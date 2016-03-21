@@ -34,18 +34,23 @@
     
     __block BOOL isDownLoading = NO;
     [[SDWebImageManager sharedManager] downloadImageWithURL:picture.url options:SDWebImageLowPriority | SDWebImageRetryFailed progress:^(NSInteger receivedSize, NSInteger expectedSize) {
-        // 第一次下载图片，先截取小图放中间，加loading
+        
+        // 下载图片，取缩略图并加loading
         if (!isDownLoading) {
             isDownLoading = YES;
+            // 取缩略图
             self.imageView.image = [self thumbnailImage:picture.sourceView];
+            // 居中
             self.imageView.frame = CGRectMake(0, 0, picture.sourceView.frame.size.width, picture.sourceView.frame.size.height);
             self.imageView.center = [UIApplication sharedApplication].keyWindow.center;
         }
     } completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
         
+        // 取原图成功
         if (image) {
-            
+            // 取原图
             self.imageView.image = image;
+            // 计算适应全屏的size
             CGSize showSize = [self showSize:image.size];
             
             if (cacheType == SDImageCacheTypeNone) {
@@ -59,7 +64,6 @@
             } else {
                 // 第一次显示图片，转换坐标系，然后动画放大
                 if (picture.isFirstShow) {
-                    picture.firstShow = NO;
                     self.imageView.frame = [picture.sourceView convertRect:picture.sourceView.bounds toView:self];
                     [UIView animateWithDuration:0.4 animations:^{
                         self.imageView.frame = CGRectMake(0, 0, showSize.width, showSize.height);
@@ -72,6 +76,11 @@
                     self.imageView.center = [UIApplication sharedApplication].keyWindow.center;
                 }
             }
+        }
+        
+        // 第一次显示图片模式结束
+        if (picture.isFirstShow) {
+            picture.firstShow = NO;
         }
     }];
 }
