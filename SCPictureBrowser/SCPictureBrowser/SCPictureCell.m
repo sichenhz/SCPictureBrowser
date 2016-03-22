@@ -8,9 +8,8 @@
 
 #import "SCPictureCell.h"
 #import "SDWebImageManager.h"
-#import "SCPictureBrowser.h"
 
-CGFloat const kMargin = 20;
+CGFloat const SCPictureCellRightMargin = 20;
 
 @interface SCPictureCell()<UIScrollViewDelegate>
 
@@ -25,7 +24,7 @@ CGFloat const kMargin = 20;
     if (self = [super initWithFrame:frame]) {
         
         // scrollView
-        UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width - kMargin, frame.size.height)];
+        UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width - SCPictureCellRightMargin, frame.size.height)];
         scrollView.showsHorizontalScrollIndicator = NO;
         scrollView.showsVerticalScrollIndicator = NO;
         scrollView.delegate = self;

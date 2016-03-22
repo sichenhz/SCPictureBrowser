@@ -7,15 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
-@class SCPictureCell;
 
-extern CGFloat const kMargin;
+extern CGFloat const SCPictureCellRightMargin;
 
-@protocol SCPictureDelegate <NSObject>
-
-- (void)pictureCellSingleTap:(SCPictureCell *)pictureCell;
-
-@end
+@protocol SCPictureDelegate;
 
 @interface SCPictureCell : UICollectionViewCell
 
@@ -23,5 +18,11 @@ extern CGFloat const kMargin;
 @property (nonatomic, weak) id<SCPictureDelegate> delegate;
 
 - (void)configureCellWithURL:(NSURL *)url sourceView:(UIView *)sourceView isFirstShow:(BOOL)isFirstShow;
+
+@end
+
+@protocol SCPictureDelegate <NSObject>
+
+- (void)pictureCellSingleTap:(SCPictureCell *)pictureCell;
 
 @end

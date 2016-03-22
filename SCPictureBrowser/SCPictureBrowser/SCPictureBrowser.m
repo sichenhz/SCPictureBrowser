@@ -36,7 +36,7 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
 - (UICollectionView *)collectionView {
     if (!_collectionView) {
         CGRect frame = self.view.frame;
-        frame.size.width += kMargin;
+        frame.size.width += SCPictureCellRightMargin;
         
         UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
         layout.itemSize = frame.size;
