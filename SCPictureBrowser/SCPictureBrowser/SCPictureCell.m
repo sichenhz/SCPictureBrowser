@@ -15,7 +15,7 @@ CGFloat const kMargin = 20;
 @interface SCPictureCell()<UIScrollViewDelegate>
 
 @property (nonatomic, weak) UIScrollView *scrollView;
-@property (nonatomic, strong) UIImage *originImage;
+@property (nonatomic) BOOL enableDoubleTap;
 
 @end
 
@@ -57,46 +57,50 @@ CGFloat const kMargin = 20;
 
 - (void)configureCellWithURL:(NSURL *)url sourceView:(UIView *)sourceView isFirstShow:(BOOL)isFirstShow {
 
-    [[SDWebImageManager sharedManager] downloadImageWithURL:url options:SDWebImageLowPriority | SDWebImageRetryFailed progress:^(NSInteger receivedSize, NSInteger expectedSize) {
-        // 下载图片，取缩略图并加loading
-        if (CGRectEqualToRect(self.imageView.frame, CGRectZero)) {
-            // 取缩略图
+    // 尝试从缓存里取图片
+    [[SDWebImageManager sharedManager].imageCache queryDiskCacheForKey:url.absoluteString done:^(UIImage *image, SDImageCacheType cacheType) {
+        // 如果没有取到图片
+        if (!image) {
+            // 设置缩略图
             self.imageView.image = [self thumbnailImage:sourceView];
-            // 居中
             self.imageView.frame = CGRectMake(0, 0, sourceView.frame.size.width, sourceView.frame.size.height);
             self.imageView.center = [UIApplication sharedApplication].keyWindow.center;
-        }
-    } completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
-        
-        // 取原图成功
-        if (image) {
-            // 取原图
-            self.originImage = image;
-            self.imageView.image = image;
-            // 计算适应全屏的size
-            CGSize showSize = [self showSize:image.size];
             
-            if (cacheType == SDImageCacheTypeNone) {
-                // 动画放大
-                [UIView animateWithDuration:0.4 animations:^{
-                    self.imageView.frame = CGRectMake(0, 0, showSize.width, showSize.height);
-                    self.imageView.center = [UIApplication sharedApplication].keyWindow.center;
-                }];
-            } else {
-                // 第一次显示图片，转换坐标系，然后动画放大
-                if (isFirstShow) {
-                    self.imageView.frame = [self convertRect:sourceView.frame toView:self];
+            // 加loading
+            
+            // 下载图片
+            [[SDWebImageManager sharedManager] downloadImageWithURL:url options:SDWebImageLowPriority | SDWebImageRetryFailed progress:nil completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+                if (image) {
+                    self.enableDoubleTap = YES;
+                    self.imageView.image = image;
+                    CGSize showSize = [self showSize:image.size];
+                    
                     [UIView animateWithDuration:0.4 animations:^{
                         self.imageView.frame = CGRectMake(0, 0, showSize.width, showSize.height);
                         self.imageView.center = [UIApplication sharedApplication].keyWindow.center;
                     }];
                 }
-                else {
-                    // 不是第一次显示图片，直接赋值frame
-                    if (CGRectEqualToRect(self.imageView.frame, CGRectZero)) {
-                        self.imageView.frame = CGRectMake(0, 0, showSize.width, showSize.height);
-                        self.imageView.center = [UIApplication sharedApplication].keyWindow.center;
-                    }
+            }];
+        }
+        // 取到了图片
+        else {
+            self.enableDoubleTap = YES;
+            self.imageView.image = image;
+            CGSize showSize = [self showSize:image.size];
+            
+            // 第一次显示图片，转换坐标系，然后动画放大
+            if (isFirstShow) {
+                self.imageView.frame = [self convertRect:sourceView.frame toView:self];
+                [UIView animateWithDuration:0.4 animations:^{
+                    self.imageView.frame = CGRectMake(0, 0, showSize.width, showSize.height);
+                    self.imageView.center = [UIApplication sharedApplication].keyWindow.center;
+                }];
+            }
+            else {
+                // 不是第一次显示图片，直接赋值frame
+                if (CGRectEqualToRect(self.imageView.frame, CGRectZero)) {
+                    self.imageView.frame = CGRectMake(0, 0, showSize.width, showSize.height);
+                    self.imageView.center = [UIApplication sharedApplication].keyWindow.center;
                 }
             }
         }
@@ -117,7 +121,7 @@ CGFloat const kMargin = 20;
 
 - (void)doubleTapHandler:(UITapGestureRecognizer *)doubleTap {
     
-    if (!self.originImage) {
+    if (!self.enableDoubleTap) {
         return;
     }
     
@@ -133,6 +137,9 @@ CGFloat const kMargin = 20;
     NSLog(@"longPress");
 }
 
+/**
+ *  计算适应全屏的size
+ */
 - (CGSize)showSize:(CGSize)imageSize {
     CGFloat heightRatio = imageSize.height / [UIScreen mainScreen].bounds.size.height;
     CGFloat widthRatio = imageSize.width / [UIScreen mainScreen].bounds.size.width;
