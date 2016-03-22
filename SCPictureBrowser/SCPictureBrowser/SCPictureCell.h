@@ -7,10 +7,21 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "SCPicture.h"
+@class SCPictureCell;
+
+extern CGFloat const kMargin;
+
+@protocol SCPictureDelegate <NSObject>
+
+- (void)pictureCellSingleTap:(SCPictureCell *)pictureCell;
+
+@end
 
 @interface SCPictureCell : UICollectionViewCell
 
-@property (nonatomic, strong) SCPicture *picture;
+@property (nonatomic, weak) UIImageView *imageView;
+@property (nonatomic, weak) id<SCPictureDelegate> delegate;
+
+- (void)configureCellWithURL:(NSURL *)url sourceView:(UIView *)sourceView isFirstShow:(BOOL)isFirstShow;
 
 @end

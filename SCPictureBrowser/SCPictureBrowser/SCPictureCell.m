@@ -8,10 +8,14 @@
 
 #import "SCPictureCell.h"
 #import "SDWebImageManager.h"
+#import "SCPictureBrowser.h"
 
-@interface SCPictureCell()
+CGFloat const kMargin = 20;
 
-@property (nonatomic, weak) UIImageView *imageView;
+@interface SCPictureCell()<UIScrollViewDelegate>
+
+@property (nonatomic, weak) UIScrollView *scrollView;
+@property (nonatomic, strong) UIImage *originImage;
 
 @end
 
@@ -19,29 +23,47 @@
 
 - (instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
+        
+        // scrollView
+        UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width - kMargin, frame.size.height)];
+        scrollView.showsHorizontalScrollIndicator = NO;
+        scrollView.showsVerticalScrollIndicator = NO;
+        scrollView.delegate = self;
+        scrollView.minimumZoomScale = 1;
+        scrollView.maximumZoomScale = 2;
+        [self addSubview:scrollView];
+        _scrollView = scrollView;
+        
+        // imageView
         UIImageView *imageView = [[UIImageView alloc] init];
         imageView.contentMode = UIViewContentModeScaleAspectFill;
         imageView.clipsToBounds = YES;
-        [self addSubview:imageView];
+        [scrollView addSubview:imageView];
         _imageView = imageView;
+        
+        // gesture
+        UITapGestureRecognizer *singleTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(singleTapHandler:)];
+        UITapGestureRecognizer *doubleTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleTapHandler:)];
+        UILongPressGestureRecognizer *longPressGesture = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPressHandler:)];
+        doubleTapGesture.numberOfTapsRequired = 2;
+        [singleTapGesture requireGestureRecognizerToFail:doubleTapGesture];
+
+        [self addGestureRecognizer:singleTapGesture];
+        [self addGestureRecognizer:doubleTapGesture];
+        [self addGestureRecognizer:longPressGesture];
     }
     return self;
 }
 
+- (void)configureCellWithURL:(NSURL *)url sourceView:(UIView *)sourceView isFirstShow:(BOOL)isFirstShow {
 
-- (void)setPicture:(SCPicture *)picture {
-    _picture = picture;
-    
-    __block BOOL isDownLoading = NO;
-    [[SDWebImageManager sharedManager] downloadImageWithURL:picture.url options:SDWebImageLowPriority | SDWebImageRetryFailed progress:^(NSInteger receivedSize, NSInteger expectedSize) {
-        
+    [[SDWebImageManager sharedManager] downloadImageWithURL:url options:SDWebImageLowPriority | SDWebImageRetryFailed progress:^(NSInteger receivedSize, NSInteger expectedSize) {
         // 下载图片，取缩略图并加loading
-        if (!isDownLoading) {
-            isDownLoading = YES;
+        if (CGRectEqualToRect(self.imageView.frame, CGRectZero)) {
             // 取缩略图
-            self.imageView.image = [self thumbnailImage:picture.sourceView];
+            self.imageView.image = [self thumbnailImage:sourceView];
             // 居中
-            self.imageView.frame = CGRectMake(0, 0, picture.sourceView.frame.size.width, picture.sourceView.frame.size.height);
+            self.imageView.frame = CGRectMake(0, 0, sourceView.frame.size.width, sourceView.frame.size.height);
             self.imageView.center = [UIApplication sharedApplication].keyWindow.center;
         }
     } completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
@@ -49,13 +71,12 @@
         // 取原图成功
         if (image) {
             // 取原图
+            self.originImage = image;
             self.imageView.image = image;
             // 计算适应全屏的size
             CGSize showSize = [self showSize:image.size];
             
             if (cacheType == SDImageCacheTypeNone) {
-                // 下载完毕
-                isDownLoading = NO;
                 // 动画放大
                 [UIView animateWithDuration:0.4 animations:^{
                     self.imageView.frame = CGRectMake(0, 0, showSize.width, showSize.height);
@@ -63,26 +84,53 @@
                 }];
             } else {
                 // 第一次显示图片，转换坐标系，然后动画放大
-                if (picture.isFirstShow) {
-                    self.imageView.frame = [picture.sourceView convertRect:picture.sourceView.bounds toView:self];
+                if (isFirstShow) {
+                    self.imageView.frame = [self convertRect:sourceView.frame toView:self];
                     [UIView animateWithDuration:0.4 animations:^{
                         self.imageView.frame = CGRectMake(0, 0, showSize.width, showSize.height);
                         self.imageView.center = [UIApplication sharedApplication].keyWindow.center;
                     }];
                 }
-                // 不是第一次显示图片，直接赋值frame
                 else {
-                    self.imageView.frame = CGRectMake(0, 0, showSize.width, showSize.height);
-                    self.imageView.center = [UIApplication sharedApplication].keyWindow.center;
+                    // 不是第一次显示图片，直接赋值frame
+                    if (CGRectEqualToRect(self.imageView.frame, CGRectZero)) {
+                        self.imageView.frame = CGRectMake(0, 0, showSize.width, showSize.height);
+                        self.imageView.center = [UIApplication sharedApplication].keyWindow.center;
+                    }
                 }
             }
         }
-        
-        // 第一次显示图片模式结束
-        if (picture.isFirstShow) {
-            picture.firstShow = NO;
-        }
     }];
+}
+
+#pragma mark - GestureRecognizer
+
+- (void)singleTapHandler:(UITapGestureRecognizer *)singleTap {
+    if (self.scrollView.zoomScale > 1) {
+        [self.scrollView setZoomScale:1 animated:YES];
+    } else {
+        if ([self.delegate respondsToSelector:@selector(pictureCellSingleTap:)]) {
+            [self.delegate pictureCellSingleTap:self];
+        }
+    }
+}
+
+- (void)doubleTapHandler:(UITapGestureRecognizer *)doubleTap {
+    
+    if (!self.originImage) {
+        return;
+    }
+    
+    CGPoint point = [doubleTap locationInView:doubleTap.view];
+    if (self.scrollView.zoomScale <= 1) {
+        [self.scrollView zoomToRect:CGRectMake(point.x, point.y, 1, 1) animated:YES];
+    } else {
+        [self.scrollView setZoomScale:self.scrollView.minimumZoomScale animated:YES];
+    }
+}
+
+- (void)longPressHandler:(UILongPressGestureRecognizer *)longPress {
+    NSLog(@"longPress");
 }
 
 - (CGSize)showSize:(CGSize)imageSize {
@@ -108,6 +156,23 @@
     UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
     return image;
+}
+
+#pragma mark - UIScrollViewDelegate
+
+- (UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView {
+    return self.imageView;
+}
+
+- (void)scrollViewDidZoom:(UIScrollView *)scrollView {
+    CGFloat offsetX = (scrollView.bounds.size.width > scrollView.contentSize.width) ?
+    (scrollView.bounds.size.width - scrollView.contentSize.width) * 0.5 : 0.0;
+    CGFloat offsetY = (scrollView.bounds.size.height > scrollView.contentSize.height) ?
+    (scrollView.bounds.size.height - scrollView.contentSize.height) * 0.5 : 0.0;
+    CGPoint actualCenter = CGPointMake(scrollView.contentSize.width * 0.5 + offsetX,
+                                       scrollView.contentSize.height * 0.5 + offsetY);
+
+    self.imageView.center = actualCenter;
 }
 
 @end

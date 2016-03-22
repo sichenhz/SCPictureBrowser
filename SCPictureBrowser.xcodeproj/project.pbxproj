@@ -13,7 +13,6 @@
 		2552304B1C9FE016009F3091 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 255230491C9FE016009F3091 /* Main.storyboard */; };
 		2552304D1C9FE016009F3091 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2552304C1C9FE016009F3091 /* Assets.xcassets */; };
 		255230501C9FE016009F3091 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2552304E1C9FE016009F3091 /* LaunchScreen.storyboard */; };
-		2552305A1C9FE08A009F3091 /* SCPicture.m in Sources */ = {isa = PBXBuildFile; fileRef = 255230591C9FE08A009F3091 /* SCPicture.m */; };
 		2552305D1C9FE09D009F3091 /* SCPictureBrowser.m in Sources */ = {isa = PBXBuildFile; fileRef = 2552305C1C9FE09D009F3091 /* SCPictureBrowser.m */; };
 		2552307D1C9FF2AD009F3091 /* NSData+ImageContentType.m in Sources */ = {isa = PBXBuildFile; fileRef = 255230611C9FF2AD009F3091 /* NSData+ImageContentType.m */; };
 		2552307E1C9FF2AD009F3091 /* SDImageCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 255230631C9FF2AD009F3091 /* SDImageCache.m */; };
@@ -43,8 +42,6 @@
 		2552304C1C9FE016009F3091 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2552304F1C9FE016009F3091 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		255230511C9FE016009F3091 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		255230581C9FE08A009F3091 /* SCPicture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SCPicture.h; sourceTree = "<group>"; };
-		255230591C9FE08A009F3091 /* SCPicture.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SCPicture.m; sourceTree = "<group>"; };
 		2552305B1C9FE09D009F3091 /* SCPictureBrowser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SCPictureBrowser.h; sourceTree = "<group>"; };
 		2552305C1C9FE09D009F3091 /* SCPictureBrowser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SCPictureBrowser.m; sourceTree = "<group>"; };
 		255230601C9FF2AD009F3091 /* NSData+ImageContentType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+ImageContentType.h"; sourceTree = "<group>"; };
@@ -138,8 +135,6 @@
 				2552305E1C9FF295009F3091 /* Lib */,
 				2552305B1C9FE09D009F3091 /* SCPictureBrowser.h */,
 				2552305C1C9FE09D009F3091 /* SCPictureBrowser.m */,
-				255230581C9FE08A009F3091 /* SCPicture.h */,
-				255230591C9FE08A009F3091 /* SCPicture.m */,
 				2552308B1C9FFCDB009F3091 /* SCPictureCell.h */,
 				2552308C1C9FFCDB009F3091 /* SCPictureCell.m */,
 			);
@@ -268,7 +263,6 @@
 				2552308A1C9FF2AD009F3091 /* UIView+WebCacheOperation.m in Sources */,
 				255230861C9FF2AD009F3091 /* UIImage+GIF.m in Sources */,
 				255230841C9FF2AD009F3091 /* SDWebImagePrefetcher.m in Sources */,
-				2552305A1C9FE08A009F3091 /* SCPicture.m in Sources */,
 				255230481C9FE016009F3091 /* ViewController.m in Sources */,
 				255230811C9FF2AD009F3091 /* SDWebImageDownloader.m in Sources */,
 				255230851C9FF2AD009F3091 /* UIButton+WebCache.m in Sources */,
@@ -428,6 +422,7 @@
 				255230561C9FE016009F3091 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

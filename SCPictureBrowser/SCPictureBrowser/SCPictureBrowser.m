@@ -8,13 +8,17 @@
 
 #import "SCPictureBrowser.h"
 #import "SCPictureCell.h"
-#import "SDWebImageManager.h"
 
 static NSString * const reuseIdentifier = @"SCPictureCell";
 
-@interface SCPictureBrowser()<UICollectionViewDataSource, UICollectionViewDelegate>
+@implementation SCPicture
+
+@end
+
+@interface SCPictureBrowser()<UICollectionViewDataSource, UICollectionViewDelegate, SCPictureDelegate, UIScrollViewDelegate>
 
 @property (nonatomic, weak) UICollectionView *collectionView;
+@property (nonatomic, getter=isFirstShow) BOOL firstShow;
 
 @end
 
@@ -27,30 +31,12 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
     self.view.backgroundColor = [UIColor blackColor];
 }
 
-- (void)viewDidLoad {
-    [super viewDidLoad];
-}
-
-#pragma mark - Private Method
-
-- (void)setPictures:(NSArray<SCPicture *> *)pictures {
-    _pictures = pictures;
-    
-    self.collectionView.contentSize = CGSizeMake(self.collectionView.frame.size.width * pictures.count, 0);
-}
-
-- (void)setIndex:(NSInteger)index {
-    _index = index;
-    
-    self.collectionView.contentOffset = CGPointMake(index * _collectionView.frame.size.width, 0);
-}
-
 #pragma mark - Getter
 
 - (UICollectionView *)collectionView {
     if (!_collectionView) {
         CGRect frame = self.view.frame;
-        frame.size.width += 20;
+        frame.size.width += kMargin;
         
         UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
         layout.itemSize = frame.size;
@@ -65,6 +51,7 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
         [collectionView registerClass:[SCPictureCell class] forCellWithReuseIdentifier:reuseIdentifier];
         collectionView.showsHorizontalScrollIndicator = NO;
         collectionView.pagingEnabled = YES;
+        collectionView.backgroundColor = [UIColor clearColor];
         [self.view addSubview:collectionView];
         
         _collectionView = collectionView;
@@ -76,12 +63,14 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
 
 - (void)show {
     
-    if (self.index > self.pictures.count - 1) {
+    if (!self.pictures.count || self.index > self.pictures.count - 1) {
         return;
     }
     
-    SCPicture *picture = self.pictures[self.index];
-    picture.firstShow = YES;
+    self.firstShow = YES;
+
+    self.collectionView.contentSize = CGSizeMake(self.collectionView.frame.size.width * self.pictures.count, 0);
+    self.collectionView.contentOffset = CGPointMake(self.index * self.collectionView.frame.size.width, 0);
     
     UIWindow *window = [UIApplication sharedApplication].keyWindow;
     [window addSubview:self.view];
@@ -96,10 +85,35 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     SCPictureCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:reuseIdentifier forIndexPath:indexPath];
-    cell.picture = self.pictures[indexPath.item];
+    SCPicture *picture = self.pictures[indexPath.item];
+    if (self.isFirstShow && indexPath.item == self.index) {
+        [cell configureCellWithURL:picture.url sourceView:picture.sourceView isFirstShow:YES];
+        self.firstShow = NO;
+    } else {
+        [cell configureCellWithURL:picture.url sourceView:picture.sourceView isFirstShow:NO];
+    }
+    cell.delegate = self;
     return cell;
 }
 
-#pragma mark - UICollectionViewDelegate
+#pragma mark - UISCrollViewDelegate
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
+    self.index = fabs(scrollView.contentOffset.x / scrollView.bounds.size.width + 0.5);
+}
+
+#pragma mark - SCPictureCellDelegate
+
+- (void)pictureCellSingleTap:(SCPictureCell *)pictureCell {
+    SCPicture *picture = self.pictures[self.index];
+    CGRect targetFrame = [picture.sourceView convertRect:picture.sourceView.bounds toView:pictureCell];
+    [UIView animateWithDuration:0.4 animations:^{
+        self.view.backgroundColor = [UIColor clearColor];
+        pictureCell.imageView.frame = targetFrame;
+    } completion:^(BOOL finished) {
+        [self.view removeFromSuperview];
+        [self removeFromParentViewController];
+    }];
+}
 
 @end

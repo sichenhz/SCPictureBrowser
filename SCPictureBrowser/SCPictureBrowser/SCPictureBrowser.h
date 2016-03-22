@@ -7,12 +7,17 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "SCPicture.h"
+
+@interface SCPicture : NSObject
+
+@property (nonatomic, strong) NSURL *url;
+@property (nonatomic, strong) UIView *sourceView;
+
+@end
 
 @interface SCPictureBrowser : UIViewController
 
 @property (nonatomic, strong) NSArray <SCPicture *> *pictures;
-
 @property (nonatomic) NSInteger index;
 
 - (void)show;
