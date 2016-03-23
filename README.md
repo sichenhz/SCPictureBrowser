@@ -1,4 +1,12 @@
 # SCPictureBrowser
 仿微信图片浏览
 
-![示例](https://img.alicdn.com/imgextra/i1/135480037/TB2Q9V4lFXXXXcPXXXXXXXXXXXX_!!135480037.gif)
+## Usage
+
+---
+``` bash
+    SCPictureBrowser *browser = [SCPictureBrowser browserWithItems:_items currentPage:currentPage numberOfPrefetchURLs:2];
+    [browser show];
+```
+
+![示例](https://img.alicdn.com/imgextra/i4/135480037/TB23QL4iVXXXXcQXXXXXXXXXXXX_!!135480037.gif)
