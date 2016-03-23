@@ -188,12 +188,11 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
                 self.pageControl.hidden = YES;
                 cell.enableDoubleTap = YES;
                 cell.imageView.image = image;
-                CGSize showSize = [cell showSize:image.size];
+                CGRect imageViewFrame = [cell imageViewRectWithImageSize:image.size];
                 // 第一次显示图片，转换坐标系，然后动画放大
                 cell.imageView.frame = [cell convertRect:picture.sourceView.frame toView:cell];
                 [UIView animateWithDuration:0.4 animations:^{
-                    cell.imageView.frame = CGRectMake(0, 0, showSize.width, showSize.height);
-                    cell.imageView.center = [UIApplication sharedApplication].keyWindow.center;
+                    cell.imageView.frame = imageViewFrame;
                 } completion:^(BOOL finished) {
                     self.pageControl.hidden = NO;
                 }];

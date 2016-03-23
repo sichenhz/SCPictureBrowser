@@ -90,11 +90,10 @@ CGFloat const SCPictureCellRightMargin = 20;
                     NSLog(@"下载图片成功");
                     self.enableDoubleTap = YES;
                     self.imageView.image = image;
-                    CGSize showSize = [self showSize:image.size];
+                    CGRect imageViewFrame = [self imageViewRectWithImageSize:image.size];
                     
                     [UIView animateWithDuration:0.4 animations:^{
-                        self.imageView.frame = CGRectMake(0, 0, showSize.width, showSize.height);
-                        self.imageView.center = [UIApplication sharedApplication].keyWindow.center;
+                        self.imageView.frame = imageViewFrame;
                     }];
                 }
             }];
@@ -108,11 +107,10 @@ CGFloat const SCPictureCellRightMargin = 20;
             
             self.enableDoubleTap = YES;
             self.imageView.image = image;
-            CGSize showSize = [self showSize:image.size];
+            CGRect imageViewFrame = [self imageViewRectWithImageSize:image.size];
             
             if (CGRectEqualToRect(self.imageView.frame, CGRectZero)) {
-                self.imageView.frame = CGRectMake(0, 0, showSize.width, showSize.height);
-                self.imageView.center = [UIApplication sharedApplication].keyWindow.center;
+                self.imageView.frame = imageViewFrame;
             }
         }
     }];
@@ -159,19 +157,23 @@ CGFloat const SCPictureCellRightMargin = 20;
 #pragma mark - Private Method
 
 /**
- *  计算适应全屏的size
+ *  计算适合屏幕大小的frmae
  */
-- (CGSize)showSize:(CGSize)imageSize {
+- (CGRect)imageViewRectWithImageSize:(CGSize)imageSize {
     CGFloat heightRatio = imageSize.height / [UIScreen mainScreen].bounds.size.height;
     CGFloat widthRatio = imageSize.width / [UIScreen mainScreen].bounds.size.width;
     
+    CGSize size = CGSizeZero;
     if (heightRatio > 1 && widthRatio <= 1) {
-        return [self ratioSize:imageSize ratio:heightRatio];
+        size = [self ratioSize:imageSize ratio:heightRatio];
     }
     if (heightRatio <= 1 && widthRatio > 1) {
-        return [self ratioSize:imageSize ratio:widthRatio];
+        size = [self ratioSize:imageSize ratio:widthRatio];
     }
-    return [self ratioSize:imageSize ratio:MAX(heightRatio, widthRatio)];
+    size = [self ratioSize:imageSize ratio:MAX(heightRatio, widthRatio)];
+    CGFloat x = ([UIScreen mainScreen].bounds.size.width - size.width) / 2;
+    CGFloat y = ([UIScreen mainScreen].bounds.size.height - size.height) / 2;
+    return CGRectMake(x, y, size.width, size.height);
 }
 
 - (CGSize)ratioSize:(CGSize)originSize ratio:(CGFloat)ratio {
