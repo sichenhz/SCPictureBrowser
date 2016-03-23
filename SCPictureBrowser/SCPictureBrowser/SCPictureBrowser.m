@@ -8,6 +8,7 @@
 
 #import "SCPictureBrowser.h"
 #import "SCPictureCell.h"
+#import "SDWebImageManager.h"
 
 static NSString * const reuseIdentifier = @"SCPictureCell";
 
@@ -108,14 +109,39 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
-    SCPictureCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:reuseIdentifier forIndexPath:indexPath];
+    
     SCPicture *picture = self.pictures[indexPath.item];
+    SCPictureCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:reuseIdentifier forIndexPath:indexPath];
+    
     if (self.isFirstShow && indexPath.item == self.index) {
-        [cell configureCellWithURL:picture.url sourceView:picture.sourceView isFirstShow:YES];
+        
+        [self.view bringSubviewToFront:self.pageControl];
+        
+        [[SDWebImageManager sharedManager].imageCache queryDiskCacheForKey:picture.url.absoluteString done:^(UIImage *image, SDImageCacheType cacheType) {
+            // 如果取到了图片
+            if (image) {
+                // 开始浏览
+                self.pageControl.hidden = YES;
+                cell.enableDoubleTap = YES;
+                cell.imageView.image = image;
+                CGSize showSize = [cell showSize:image.size];
+                // 第一次显示图片，转换坐标系，然后动画放大
+                cell.imageView.frame = [cell convertRect:picture.sourceView.frame toView:cell];
+                [UIView animateWithDuration:0.4 animations:^{
+                    cell.imageView.frame = CGRectMake(0, 0, showSize.width, showSize.height);
+                    cell.imageView.center = [UIApplication sharedApplication].keyWindow.center;
+                } completion:^(BOOL finished) {
+                    self.pageControl.hidden = NO;
+                }];
+            } else {
+                [cell configureCellWithURL:picture.url sourceView:picture.sourceView];
+            }
+        }];
         self.firstShow = NO;
     } else {
-        [cell configureCellWithURL:picture.url sourceView:picture.sourceView isFirstShow:NO];
+        [cell configureCellWithURL:picture.url sourceView:picture.sourceView];
     }
+
     cell.delegate = self;
     return cell;
 }
@@ -129,12 +155,16 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
 #pragma mark - SCPictureCellDelegate
 
 - (void)pictureCellSingleTap:(SCPictureCell *)pictureCell {
+    
+    // 结束浏览
+    self.pageControl.hidden = YES;
     SCPicture *picture = self.pictures[self.index];
     CGRect targetFrame = [picture.sourceView convertRect:picture.sourceView.bounds toView:pictureCell];
     [UIView animateWithDuration:0.4 animations:^{
         self.view.backgroundColor = [UIColor clearColor];
         pictureCell.imageView.frame = targetFrame;
     } completion:^(BOOL finished) {
+        self.pageControl.hidden = NO;
         [self.view removeFromSuperview];
         [self removeFromParentViewController];
     }];

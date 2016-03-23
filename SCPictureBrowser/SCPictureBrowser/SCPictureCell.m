@@ -16,7 +16,6 @@ CGFloat const SCPictureCellRightMargin = 20;
 
 @property (nonatomic, weak) UIScrollView *scrollView;
 @property (nonatomic, weak) SCActivityIndicatorView *indicator;
-@property (nonatomic) BOOL enableDoubleTap;
 
 @end
 
@@ -30,8 +29,6 @@ CGFloat const SCPictureCellRightMargin = 20;
         scrollView.showsHorizontalScrollIndicator = NO;
         scrollView.showsVerticalScrollIndicator = NO;
         scrollView.delegate = self;
-        scrollView.minimumZoomScale = 1;
-        scrollView.maximumZoomScale = 2;
         [self addSubview:scrollView];
         _scrollView = scrollView;
         
@@ -61,7 +58,7 @@ CGFloat const SCPictureCellRightMargin = 20;
     return self;
 }
 
-- (void)configureCellWithURL:(NSURL *)url sourceView:(UIView *)sourceView isFirstShow:(BOOL)isFirstShow {
+- (void)configureCellWithURL:(NSURL *)url sourceView:(UIView *)sourceView {
 
     // 尝试从缓存里取图片
     [[SDWebImageManager sharedManager].imageCache queryDiskCacheForKey:url.absoluteString done:^(UIImage *image, SDImageCacheType cacheType) {
@@ -95,24 +92,17 @@ CGFloat const SCPictureCellRightMargin = 20;
         }
         // 从缓存中取到了图片
         else {
+            if (self.scrollView.zoomScale > 1) {
+                [self.scrollView setZoomScale:1 animated:NO];
+            }
+            
             self.enableDoubleTap = YES;
             self.imageView.image = image;
             CGSize showSize = [self showSize:image.size];
             
-            // 第一次显示图片，转换坐标系，然后动画放大
-            if (isFirstShow) {
-                self.imageView.frame = [self convertRect:sourceView.frame toView:self];
-                [UIView animateWithDuration:0.4 animations:^{
-                    self.imageView.frame = CGRectMake(0, 0, showSize.width, showSize.height);
-                    self.imageView.center = [UIApplication sharedApplication].keyWindow.center;
-                }];
-            }
-            else {
-                // 不是第一次显示图片，直接赋值frame
-                if (CGRectEqualToRect(self.imageView.frame, CGRectZero)) {
-                    self.imageView.frame = CGRectMake(0, 0, showSize.width, showSize.height);
-                    self.imageView.center = [UIApplication sharedApplication].keyWindow.center;
-                }
+            if (CGRectEqualToRect(self.imageView.frame, CGRectZero)) {
+                self.imageView.frame = CGRectMake(0, 0, showSize.width, showSize.height);
+                self.imageView.center = [UIApplication sharedApplication].keyWindow.center;
             }
         }
     }];
@@ -141,6 +131,11 @@ CGFloat const SCPictureCellRightMargin = 20;
     
     CGPoint point = [doubleTap locationInView:doubleTap.view];
     if (self.scrollView.zoomScale <= 1) {
+        if (self.imageView.frame.size.height * 2 < self.frame.size.height) {
+            self.scrollView.maximumZoomScale = self.frame.size.height / self.imageView.frame.size.height;
+        } else {
+            self.scrollView.maximumZoomScale = 2;
+        }
         [self.scrollView zoomToRect:CGRectMake(point.x, point.y, 1, 1) animated:YES];
     } else {
         [self.scrollView setZoomScale:self.scrollView.minimumZoomScale animated:YES];

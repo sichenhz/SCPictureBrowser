@@ -16,8 +16,11 @@ extern CGFloat const SCPictureCellRightMargin;
 
 @property (nonatomic, weak) UIImageView *imageView;
 @property (nonatomic, weak) id<SCPictureDelegate> delegate;
+@property (nonatomic) BOOL enableDoubleTap;
 
-- (void)configureCellWithURL:(NSURL *)url sourceView:(UIView *)sourceView isFirstShow:(BOOL)isFirstShow;
+- (void)configureCellWithURL:(NSURL *)url sourceView:(UIView *)sourceView;
+
+- (CGSize)showSize:(CGSize)imageSize;
 
 @end
 
