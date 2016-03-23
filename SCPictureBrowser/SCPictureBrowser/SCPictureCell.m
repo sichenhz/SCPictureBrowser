@@ -8,12 +8,14 @@
 
 #import "SCPictureCell.h"
 #import "SDWebImageManager.h"
+#import "SCActivityIndicatorView.h"
 
 CGFloat const SCPictureCellRightMargin = 20;
 
 @interface SCPictureCell()<UIScrollViewDelegate>
 
 @property (nonatomic, weak) UIScrollView *scrollView;
+@property (nonatomic, weak) SCActivityIndicatorView *indicator;
 @property (nonatomic) BOOL enableDoubleTap;
 
 @end
@@ -40,6 +42,12 @@ CGFloat const SCPictureCellRightMargin = 20;
         [scrollView addSubview:imageView];
         _imageView = imageView;
         
+        // indicator
+        SCActivityIndicatorView *indicator = [[SCActivityIndicatorView alloc] init];
+        indicator.center = scrollView.center;
+        [self addSubview:indicator];
+        _indicator = indicator;
+        
         // gesture
         UITapGestureRecognizer *singleTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(singleTapHandler:)];
         UITapGestureRecognizer *doubleTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleTapHandler:)];
@@ -65,10 +73,15 @@ CGFloat const SCPictureCellRightMargin = 20;
             self.imageView.frame = CGRectMake(0, 0, sourceView.frame.size.width, sourceView.frame.size.height);
             self.imageView.center = [UIApplication sharedApplication].keyWindow.center;
             
-            // 加loading
+            // loading
+            [self.indicator startAnimating];
             
             // 下载图片
             [[SDWebImageManager sharedManager] downloadImageWithURL:url options:SDWebImageLowPriority | SDWebImageRetryFailed progress:nil completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+                // 结束loading
+                [self.indicator stopAnimating];
+                
+                // 成功下载图片
                 if (image) {
                     self.enableDoubleTap = YES;
                     self.imageView.image = image;
@@ -81,7 +94,7 @@ CGFloat const SCPictureCellRightMargin = 20;
                 }
             }];
         }
-        // 取到了图片
+        // 从缓存中取到了图片
         else {
             self.enableDoubleTap = YES;
             self.imageView.image = image;
@@ -112,6 +125,9 @@ CGFloat const SCPictureCellRightMargin = 20;
     if (self.scrollView.zoomScale > 1) {
         [self.scrollView setZoomScale:1 animated:YES];
     } else {
+        if (self.indicator.isAnimating) {
+            [self.indicator stopAnimating];
+        }
         if ([self.delegate respondsToSelector:@selector(pictureCellSingleTap:)]) {
             [self.delegate pictureCellSingleTap:self];
         }
