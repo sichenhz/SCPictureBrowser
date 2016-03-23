@@ -18,6 +18,7 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
 @interface SCPictureBrowser()<UICollectionViewDataSource, UICollectionViewDelegate, SCPictureDelegate, UIScrollViewDelegate>
 
 @property (nonatomic, weak) UICollectionView *collectionView;
+@property (nonatomic, weak) UIPageControl *pageControl;
 @property (nonatomic, getter=isFirstShow) BOOL firstShow;
 
 @end
@@ -59,6 +60,22 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
     return _collectionView;
 }
 
+- (UIPageControl *)pageControl {
+    if (!_pageControl) {
+        UIPageControl *pageControl = [[UIPageControl alloc] init];
+        [self.view addSubview:pageControl];
+        _pageControl = pageControl;
+    }
+    return _pageControl;
+}
+
+- (void)setIndex:(NSInteger)index {
+    if (_index != index) {
+        _index = index;
+        self.pageControl.currentPage = index;
+    }
+}
+
 #pragma mark - Public Method
 
 - (void)show {
@@ -71,6 +88,13 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
 
     self.collectionView.contentSize = CGSizeMake(self.collectionView.frame.size.width * self.pictures.count, 0);
     self.collectionView.contentOffset = CGPointMake(self.index * self.collectionView.frame.size.width, 0);
+    
+    self.pageControl.numberOfPages = self.pictures.count;
+    self.pageControl.currentPage = self.index;
+    CGPoint center = self.pageControl.center;
+    center.x = self.view.center.x;
+    center.y = CGRectGetMaxY(self.view.frame) - self.pageControl.frame.size.height / 2 - 20;
+    self.pageControl.center = center;
     
     UIWindow *window = [UIApplication sharedApplication].keyWindow;
     [window addSubview:self.view];
@@ -99,7 +123,7 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
 #pragma mark - UISCrollViewDelegate
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
-    self.index = fabs(scrollView.contentOffset.x / scrollView.bounds.size.width + 0.5);
+    self.index = fabs(scrollView.contentOffset.x / scrollView.bounds.size.width);
 }
 
 #pragma mark - SCPictureCellDelegate

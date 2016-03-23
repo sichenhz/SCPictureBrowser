@@ -54,7 +54,6 @@ CGFloat const SCPictureCellRightMargin = 20;
         UILongPressGestureRecognizer *longPressGesture = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPressHandler:)];
         doubleTapGesture.numberOfTapsRequired = 2;
         [singleTapGesture requireGestureRecognizerToFail:doubleTapGesture];
-
         [self addGestureRecognizer:singleTapGesture];
         [self addGestureRecognizer:doubleTapGesture];
         [self addGestureRecognizer:longPressGesture];
@@ -151,6 +150,8 @@ CGFloat const SCPictureCellRightMargin = 20;
 - (void)longPressHandler:(UILongPressGestureRecognizer *)longPress {
     NSLog(@"longPress");
 }
+
+#pragma mark - Private Method
 
 /**
  *  计算适应全屏的size

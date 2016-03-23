@@ -20,37 +20,29 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     
+    NSArray *urls = @[@"http://pic.lehe.com/pic/_o/69/ba/5d627fc316f70ecf085a96c202e6_380_672.cz.jpg",
+                      @"http://pic.lehe.com/pic/_o/28/8c/322383173465a602cbb3a8bc5048_448_260.cz.jpg"];
+    NSInteger columns = 3;
+
     NSMutableArray *arrM = [NSMutableArray array];
     
-    UIButton *button1 = [UIButton buttonWithType:UIButtonTypeCustom];
-    [button1 setImage:[UIImage imageNamed:@"icon2"] forState:UIControlStateNormal];
-    [button1 sizeToFit];
-    CGRect frame = button1.frame;
-    frame.origin.x = 55;
-    frame.origin.y = 55;
-    button1.frame = frame;
-    button1.tag = 0;
-    [button1 addTarget:self action:@selector(buttonPressed:) forControlEvents:UIControlEventTouchUpInside];
-    [self.view addSubview:button1];
-    SCPicture *picture = [[SCPicture alloc] init];
-    picture.url = [NSURL URLWithString:@"http://pic.lehe.com/pic/_o/28/8c/322383173465a602cbb3a8bc5048_448_260.cz.jpg"];
-    picture.sourceView = button1;
-    [arrM addObject:picture];
-    
-    UIButton *button2 = [UIButton buttonWithType:UIButtonTypeCustom];
-    [button2 setImage:[UIImage imageNamed:@"icon1"] forState:UIControlStateNormal];
-    [button2 sizeToFit];
-    frame = button2.frame;
-    frame.origin.x = 50;
-    frame.origin.y = 150;
-    button2.frame = frame;
-    button2.tag = 1;
-    [button2 addTarget:self action:@selector(buttonPressed:) forControlEvents:UIControlEventTouchUpInside];
-    [self.view addSubview:button2];
-    picture = [[SCPicture alloc] init];
-    picture.url = [NSURL URLWithString:@"http://pic.lehe.com/pic/_o/69/ba/5d627fc316f70ecf085a96c202e6_380_672.cz.jpg"];
-    picture.sourceView = button2;
-    [arrM addObject:picture];
+    for (NSInteger i = 0; i < 9; i++) {
+        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+        [button setImage:[UIImage imageNamed:[NSString stringWithFormat:@"icon%zd", i % 2]] forState:UIControlStateNormal];
+        [button sizeToFit];
+        CGFloat w = button.frame.size.width;
+        CGFloat h = button.frame.size.height;
+        CGFloat x = w * (i % columns) + 20;
+        CGFloat y = h * (i / columns) + 100;
+        button.frame = CGRectMake(x, y, w, h);
+        button.tag = i;
+        [button addTarget:self action:@selector(buttonPressed:) forControlEvents:UIControlEventTouchUpInside];
+        [self.view addSubview:button];
+        SCPicture *picture = [[SCPicture alloc] init];
+        picture.url = [NSURL URLWithString:urls[i % 2]];
+        picture.sourceView = button;
+        [arrM addObject:picture];
+    }
     
     self.pictures = [arrM copy];
 }
