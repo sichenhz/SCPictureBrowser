@@ -103,6 +103,7 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
     if (_currentPage != currentPage) {
         _currentPage = currentPage;
         self.pageControl.currentPage = currentPage;
+        [self prefetchPictures];
     }
 }
 
@@ -119,21 +120,15 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
         for (NSInteger i = self.currentPage - 1; i >= self.currentPage - self.numberOfPrefetchURLs; i--) {
             SCPictureItem *picture = self.items[i];
             [arrM addObject:picture.url];
-            NSLog(@"开始预加载图片，下标为%zd",i);
         }
     }
     if (self.currentPage <= self.items.count - 1 - self.numberOfPrefetchURLs) {
         for (NSInteger i = self.currentPage + 1; i <= self.currentPage + self.numberOfPrefetchURLs; i++) {
             SCPictureItem *picture = self.items[i];
             [arrM addObject:picture.url];
-            NSLog(@"开始预加载图片，下标为%zd",i);
         }
     }
-    [[SDWebImagePrefetcher sharedImagePrefetcher] prefetchURLs:[arrM copy] progress:^(NSUInteger noOfFinishedUrls, NSUInteger noOfTotalUrls) {
-        NSLog(@"当前预加载进度%zd/%zd", noOfFinishedUrls, noOfTotalUrls);
-    } completed:^(NSUInteger noOfFinishedUrls, NSUInteger noOfSkippedUrls) {
-        NSLog(@"当前预加载成功%zd|加载失败%zd", noOfFinishedUrls, noOfSkippedUrls);
-    }];
+    [[SDWebImagePrefetcher sharedImagePrefetcher] prefetchURLs:[arrM copy]];
 }
 
 #pragma mark - Public Method
@@ -218,7 +213,6 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
 #pragma mark - SCPictureCellDelegate
 
 - (void)pictureCellSingleTap:(SCPictureCell *)pictureCell {
-    
     // 结束浏览
     [[UIApplication sharedApplication] setStatusBarHidden:self.isStatusBarHidden withAnimation:UIStatusBarAnimationFade];
     self.pageControl.hidden = YES;
@@ -232,6 +226,10 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
         [self.view removeFromSuperview];
         [self removeFromParentViewController];
     }];
+}
+
+- (void)pictureCellLongPress:(SCPictureCell *)pictureCell {
+    NSLog(@"longPress");
 }
 
 @end

@@ -27,5 +27,6 @@ extern CGFloat const SCPictureCellRightMargin;
 @protocol SCPictureDelegate <NSObject>
 
 - (void)pictureCellSingleTap:(SCPictureCell *)pictureCell;
+- (void)pictureCellLongPress:(SCPictureCell *)pictureCell;
 
 @end

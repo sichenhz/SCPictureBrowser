@@ -60,12 +60,10 @@ CGFloat const SCPictureCellRightMargin = 20;
 
 - (void)configureCellWithURL:(NSURL *)url sourceView:(UIView *)sourceView {
 
-    NSLog(@"尝试从缓存里取图片");
     // 尝试从缓存里取图片
     [[SDWebImageManager sharedManager].imageCache queryDiskCacheForKey:url.absoluteString done:^(UIImage *image, SDImageCacheType cacheType) {
         // 如果没有取到图片
         if (!image) {
-            NSLog(@"没有取到图片，设置缩略图");
             // 设置缩略图
             self.imageView.image = [self thumbnailImage:sourceView];
             self.imageView.frame = CGRectMake(0, 0, sourceView.frame.size.width, sourceView.frame.size.height);
@@ -75,19 +73,12 @@ CGFloat const SCPictureCellRightMargin = 20;
             [self.indicator startAnimating];
             
             // 下载图片
-            [[SDWebImageManager sharedManager] downloadImageWithURL:url options:SDWebImageLowPriority | SDWebImageRetryFailed progress:^(NSInteger receivedSize, NSInteger expectedSize) {
-                if (expectedSize == -1) {
-                    NSLog(@"开始下载图片，url:%@", url);
-                } else {
-                    NSLog(@"%.f%%", ((float)receivedSize / expectedSize) * 100);
-                }
-            } completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+            [[SDWebImageManager sharedManager] downloadImageWithURL:url options:SDWebImageLowPriority | SDWebImageRetryFailed progress:nil completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
                 // 结束loading
                 [self.indicator stopAnimating];
                 
                 // 成功下载图片
                 if (image) {
-                    NSLog(@"下载图片成功");
                     self.enableDoubleTap = YES;
                     self.imageView.image = image;
                     CGRect imageViewFrame = [self imageViewRectWithImageSize:image.size];
@@ -100,7 +91,6 @@ CGFloat const SCPictureCellRightMargin = 20;
         }
         // 从缓存中取到了图片
         else {
-            NSLog(@"从缓存中取到了图片");
             if (self.scrollView.zoomScale > 1) {
                 [self.scrollView setZoomScale:1 animated:NO];
             }
@@ -151,7 +141,9 @@ CGFloat const SCPictureCellRightMargin = 20;
 }
 
 - (void)longPressHandler:(UILongPressGestureRecognizer *)longPress {
-    NSLog(@"longPress");
+    if ([self.delegate respondsToSelector:@selector(pictureCellLongPress:)]) {
+        [self.delegate pictureCellLongPress:self];
+    }
 }
 
 #pragma mark - Private Method
