@@ -8,51 +8,63 @@
 
 #import "ViewController.h"
 #import "SCPictureBrowser.h"
+#import "UIImageView+WebCache.h"
 
 @interface ViewController ()
 
-@property (nonatomic, strong) NSArray *pictures;
+@property (nonatomic, strong) NSArray *items;
 
 @end
 
 @implementation ViewController
+{
+    NSArray *_urls;
+    NSArray *_pictures;
+}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     
-    NSArray *urls = @[@"http://pic.lehe.com/pic/_o/69/ba/5d627fc316f70ecf085a96c202e6_380_672.cz.jpg",
-                      @"http://pic.lehe.com/pic/_o/28/8c/322383173465a602cbb3a8bc5048_448_260.cz.jpg"];
+    _urls = @[@"http://ww4.sinaimg.cn/thumbnail/7f8c1087gw1e9g06pc68ug20ag05y4qq.gif",
+                      @"http://ww3.sinaimg.cn/thumbnail/8e88b0c1gw1e9lpr0nly5j20pf0gygo6.jpg",
+                      @"http://ww4.sinaimg.cn/thumbnail/8e88b0c1gw1e9lpr1d0vyj20pf0gytcj.jpg",
+                      @"http://ww3.sinaimg.cn/thumbnail/8e88b0c1gw1e9lpr1xydcj20gy0o9q6s.jpg",
+                      @"http://ww2.sinaimg.cn/thumbnail/8e88b0c1gw1e9lpr2n1jjj20gy0o9tcc.jpg",
+                      @"http://ww2.sinaimg.cn/thumbnail/8e88b0c1gw1e9lpr39ht9j20gy0o6q74.jpg",
+                      @"http://ww3.sinaimg.cn/thumbnail/8e88b0c1gw1e9lpr3xvtlj20gy0obadv.jpg",
+                      @"http://ww4.sinaimg.cn/thumbnail/8e88b0c1gw1e9lpr4nndfj20gy0o9q6i.jpg",
+                      @"http://ww3.sinaimg.cn/thumbnail/8e88b0c1gw1e9lpr57tn9j20gy0obn0f.jpg"];
     NSInteger columns = 3;
 
     NSMutableArray *arrM = [NSMutableArray array];
     
     for (NSInteger i = 0; i < 9; i++) {
-        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-        NSString *imageStr = [NSString stringWithFormat:@"icon%zd.jpg", i % 2];
-        [button setImage:[UIImage imageNamed:imageStr] forState:UIControlStateNormal];
-        [button sizeToFit];
-        CGFloat w = button.frame.size.width;
-        CGFloat h = button.frame.size.height;
-        CGFloat x = w * (i % columns) + 20;
-        CGFloat y = h * (i / columns) + 100;
-        button.frame = CGRectMake(x, y, w, h);
-        button.tag = i;
-        [button addTarget:self action:@selector(buttonPressed:) forControlEvents:UIControlEventTouchUpInside];
-        [self.view addSubview:button];
-        SCPicture *picture = [[SCPicture alloc] init];
-        picture.url = [NSURL URLWithString:urls[i % 2]];
-        picture.sourceView = button;
+        UIImageView *imageView = [[UIImageView alloc] init];
+        imageView.userInteractionEnabled = YES;
+        imageView.contentMode = UIViewContentModeScaleAspectFill;
+        imageView.clipsToBounds = YES;
+        [imageView sd_setImageWithURL:[NSURL URLWithString:_urls[i]]];
+        CGFloat w = 60;
+        CGFloat h = 60;
+        CGFloat x = (w + 20) * (i % columns) + 50;
+        CGFloat y = (h + 20) * (i / columns) + 200;
+        imageView.frame = CGRectMake(x, y, w, h);
+        imageView.tag = i;
+        UITapGestureRecognizer *gesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(imageViewPressed:)];
+        [imageView addGestureRecognizer:gesture];
+        [self.view addSubview:imageView];
+        
+        NSString *url = [_urls[i] stringByReplacingOccurrencesOfString:@"thumbnail" withString:@"bmiddle"];
+        SCPictureItem *picture = [SCPictureItem itemWithURL:[NSURL URLWithString:url] sourceView:imageView];
         [arrM addObject:picture];
     }
     
-    self.pictures = [arrM copy];
+    self.items = [arrM copy];
 }
 
-- (void)buttonPressed:(UIButton *)sender {
-    SCPictureBrowser *pictureBrowser = [[SCPictureBrowser alloc] init];
-    pictureBrowser.pictures = self.pictures;
-    pictureBrowser.index = sender.tag;
+- (void)imageViewPressed:(UITapGestureRecognizer *)gesture {
+    SCPictureBrowser *pictureBrowser = [SCPictureBrowser browserWithItems:self.items currentPage:gesture.view.tag numberOfPrefetchURLs:2];
     [pictureBrowser show];
 }
 

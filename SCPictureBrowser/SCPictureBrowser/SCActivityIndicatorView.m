@@ -33,7 +33,7 @@
     animation.duration = 1.0;
     animation.fillMode=kCAFillModeForwards;
     animation.removedOnCompletion = NO;
-    animation.repeatCount = 99999;
+    animation.repeatCount = MAXFLOAT;
     [_imageView.layer addAnimation:animation forKey:@"rotation"];
     _isAnimating = YES;
 }

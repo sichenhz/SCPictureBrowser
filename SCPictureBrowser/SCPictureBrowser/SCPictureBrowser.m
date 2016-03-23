@@ -9,14 +9,32 @@
 #import "SCPictureBrowser.h"
 #import "SCPictureCell.h"
 #import "SDWebImageManager.h"
+#import "SDWebImagePrefetcher.h"
 
 static NSString * const reuseIdentifier = @"SCPictureCell";
 
-@implementation SCPicture
+@interface SCPictureItem()
+
+@property (nonnull, nonatomic, strong, readwrite) NSURL *url;
+@property (nonnull, nonatomic, strong, readwrite) UIView *sourceView;
+
+@end
+
+@implementation SCPictureItem
+
++ (instancetype)itemWithURL:(nonnull NSURL *)url sourceView:(nonnull UIView *)sourceView {
+    SCPictureItem *item = [[SCPictureItem alloc] init];
+    item.url = url;
+    item.sourceView = sourceView;
+    return item;
+}
 
 @end
 
 @interface SCPictureBrowser()<UICollectionViewDataSource, UICollectionViewDelegate, SCPictureDelegate, UIScrollViewDelegate>
+
+@property (nonnull, nonatomic, strong, readwrite) NSArray <SCPictureItem *> *items;
+@property (nonatomic, readwrite) NSInteger currentPage;
 
 @property (nonatomic, weak) UICollectionView *collectionView;
 @property (nonatomic, weak) UIPageControl *pageControl;
@@ -26,6 +44,14 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
 @end
 
 @implementation SCPictureBrowser
+
++ (instancetype)browserWithItems:(nonnull NSArray *)items currentPage:(NSInteger)currentPage numberOfPrefetchURLs:(NSInteger)numberOfPrefetchURLs {
+    SCPictureBrowser *browser = [[SCPictureBrowser alloc] init];
+    browser.items = items;
+    browser.currentPage = currentPage;
+    browser.numberOfPrefetchURLs = numberOfPrefetchURLs;
+    return browser;
+}
 
 #pragma mark - Life Cycle
 
@@ -71,31 +97,65 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
     return _pageControl;
 }
 
-- (void)setIndex:(NSInteger)index {
-    if (_index != index) {
-        _index = index;
-        self.pageControl.currentPage = index;
+#pragma mark - Setter
+
+- (void)setCurrentPage:(NSInteger)currentPage {
+    if (_currentPage != currentPage) {
+        _currentPage = currentPage;
+        self.pageControl.currentPage = currentPage;
     }
+}
+
+#pragma mark - Private Method
+
+- (void)prefetchPictures {
+    if (self.numberOfPrefetchURLs <= 0) {
+        return;
+    }
+    
+    NSMutableArray *arrM = [NSMutableArray array];
+    
+    if (self.currentPage >= self.numberOfPrefetchURLs) {
+        for (NSInteger i = self.currentPage - 1; i >= self.currentPage - self.numberOfPrefetchURLs; i--) {
+            SCPictureItem *picture = self.items[i];
+            [arrM addObject:picture.url];
+            NSLog(@"开始预加载图片，下标为%zd",i);
+        }
+    }
+    if (self.currentPage <= self.items.count - 1 - self.numberOfPrefetchURLs) {
+        for (NSInteger i = self.currentPage + 1; i <= self.currentPage + self.numberOfPrefetchURLs; i++) {
+            SCPictureItem *picture = self.items[i];
+            [arrM addObject:picture.url];
+            NSLog(@"开始预加载图片，下标为%zd",i);
+        }
+    }
+    [[SDWebImagePrefetcher sharedImagePrefetcher] prefetchURLs:[arrM copy] progress:^(NSUInteger noOfFinishedUrls, NSUInteger noOfTotalUrls) {
+        NSLog(@"当前预加载进度%zd/%zd", noOfFinishedUrls, noOfTotalUrls);
+    } completed:^(NSUInteger noOfFinishedUrls, NSUInteger noOfSkippedUrls) {
+        NSLog(@"当前预加载成功%zd|加载失败%zd", noOfFinishedUrls, noOfSkippedUrls);
+    }];
 }
 
 #pragma mark - Public Method
 
 - (void)show {
     
-    if (!self.pictures.count || self.index > self.pictures.count - 1) {
+    if (!self.items.count || self.currentPage > self.items.count - 1) {
         return;
     }
     
+    [self prefetchPictures];
+
     self.statusBarHidden = [UIApplication sharedApplication].isStatusBarHidden;
     [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationFade];
 
     self.firstShow = YES;
 
-    self.collectionView.contentSize = CGSizeMake(self.collectionView.frame.size.width * self.pictures.count, 0);
-    self.collectionView.contentOffset = CGPointMake(self.index * self.collectionView.frame.size.width, 0);
+    self.collectionView.contentSize = CGSizeMake(self.collectionView.frame.size.width * self.items.count, 0);
+    self.collectionView.contentOffset = CGPointMake(self.currentPage * self.collectionView.frame.size.width, 0);
     
-    self.pageControl.numberOfPages = self.pictures.count;
-    self.pageControl.currentPage = self.index;
+    self.pageControl.numberOfPages = self.items.count;
+    self.pageControl.currentPage = self.currentPage;
     CGPoint center = self.pageControl.center;
     center.x = self.view.center.x;
     center.y = CGRectGetMaxY(self.view.frame) - self.pageControl.frame.size.height / 2 - 20;
@@ -109,15 +169,15 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
 #pragma mark - UICollectionViewDataSource
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
-    return self.pictures.count;
+    return self.items.count;
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     
-    SCPicture *picture = self.pictures[indexPath.item];
+    SCPictureItem *picture = self.items[indexPath.item];
     SCPictureCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:reuseIdentifier forIndexPath:indexPath];
     
-    if (self.isFirstShow && indexPath.item == self.index) {
+    if (self.isFirstShow && indexPath.item == self.currentPage) {
         
         [self.view bringSubviewToFront:self.pageControl];
         
@@ -153,7 +213,7 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
 #pragma mark - UISCrollViewDelegate
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
-    self.index = fabs(scrollView.contentOffset.x / scrollView.bounds.size.width);
+    self.currentPage = fabs(scrollView.contentOffset.x / scrollView.bounds.size.width);
 }
 
 #pragma mark - SCPictureCellDelegate
@@ -163,7 +223,7 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
     // 结束浏览
     [[UIApplication sharedApplication] setStatusBarHidden:self.isStatusBarHidden withAnimation:UIStatusBarAnimationFade];
     self.pageControl.hidden = YES;
-    SCPicture *picture = self.pictures[self.index];
+    SCPictureItem *picture = self.items[self.currentPage];
     CGRect targetFrame = [picture.sourceView convertRect:picture.sourceView.bounds toView:pictureCell];
     [UIView animateWithDuration:0.4 animations:^{
         self.view.backgroundColor = [UIColor clearColor];
