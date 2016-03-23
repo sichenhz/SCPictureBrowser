@@ -115,9 +115,9 @@ CGFloat const SCPictureCellRightMargin = 20;
         if (self.indicator.isAnimating) {
             [self.indicator stopAnimating];
         }
-        if ([self.delegate respondsToSelector:@selector(pictureCellSingleTap:)]) {
-            [self.delegate pictureCellSingleTap:self];
-        }
+    }
+    if ([self.delegate respondsToSelector:@selector(pictureCellSingleTap:)]) {
+        [self.delegate pictureCellSingleTap:self];
     }
 }
 

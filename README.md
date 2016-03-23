@@ -6,7 +6,7 @@
 ---
 ``` bash
     SCPictureBrowser *browser = [SCPictureBrowser browserWithItems:_items
-                                                       currentPage:gesture.view.tag
+                                                       currentPage:_currentPage
                                               numberOfPrefetchURLs:2];
     [browser show];
 ```
