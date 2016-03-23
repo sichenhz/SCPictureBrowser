@@ -59,7 +59,9 @@
 }
 
 - (void)imageViewPressed:(UITapGestureRecognizer *)gesture {
-    SCPictureBrowser *browser = [SCPictureBrowser browserWithItems:_items currentPage:gesture.view.tag numberOfPrefetchURLs:2];
+    SCPictureBrowser *browser = [SCPictureBrowser browserWithItems:_items
+                                                       currentPage:gesture.view.tag
+                                              numberOfPrefetchURLs:2];
     [browser show];
 }
 
