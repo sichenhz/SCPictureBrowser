@@ -21,6 +21,7 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
 @property (nonatomic, weak) UICollectionView *collectionView;
 @property (nonatomic, weak) UIPageControl *pageControl;
 @property (nonatomic, getter=isFirstShow) BOOL firstShow;
+@property (nonatomic, getter=isStatusBarHidden) BOOL statusBarHidden;
 
 @end
 
@@ -85,6 +86,9 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
         return;
     }
     
+    self.statusBarHidden = [UIApplication sharedApplication].isStatusBarHidden;
+    [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationFade];
+
     self.firstShow = YES;
 
     self.collectionView.contentSize = CGSizeMake(self.collectionView.frame.size.width * self.pictures.count, 0);
@@ -157,6 +161,7 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
 - (void)pictureCellSingleTap:(SCPictureCell *)pictureCell {
     
     // 结束浏览
+    [[UIApplication sharedApplication] setStatusBarHidden:self.isStatusBarHidden withAnimation:UIStatusBarAnimationFade];
     self.pageControl.hidden = YES;
     SCPicture *picture = self.pictures[self.index];
     CGRect targetFrame = [picture.sourceView convertRect:picture.sourceView.bounds toView:pictureCell];

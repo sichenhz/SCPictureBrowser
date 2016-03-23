@@ -12,6 +12,7 @@
 @interface ViewController ()
 
 @property (nonatomic, strong) NSArray *pictures;
+
 @end
 
 @implementation ViewController
@@ -28,7 +29,8 @@
     
     for (NSInteger i = 0; i < 9; i++) {
         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-        [button setImage:[UIImage imageNamed:[NSString stringWithFormat:@"icon%zd", i % 2]] forState:UIControlStateNormal];
+        NSString *imageStr = [NSString stringWithFormat:@"icon%zd.jpg", i % 2];
+        [button setImage:[UIImage imageNamed:imageStr] forState:UIControlStateNormal];
         [button sizeToFit];
         CGFloat w = button.frame.size.width;
         CGFloat h = button.frame.size.height;
