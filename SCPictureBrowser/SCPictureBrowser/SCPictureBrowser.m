@@ -33,24 +33,16 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
 
 @interface SCPictureBrowser()<UICollectionViewDataSource, UICollectionViewDelegate, SCPictureDelegate, UIScrollViewDelegate>
 
-@property (nonnull, nonatomic, strong, readwrite) NSArray <SCPictureItem *> *items;
-@property (nonatomic, readwrite) NSInteger currentPage;
-
-@property (nonatomic, weak) UICollectionView *collectionView;
-@property (nonatomic, weak) UIPageControl *pageControl;
 @property (nonatomic, getter=isFirstShow) BOOL firstShow;
 @property (nonatomic, getter=isStatusBarHidden) BOOL statusBarHidden;
+@property (nonatomic, getter=isBrowsing) BOOL browsing;
 
 @end
 
 @implementation SCPictureBrowser
-
-+ (instancetype)browserWithItems:(nonnull NSArray *)items currentPage:(NSInteger)currentPage numberOfPrefetchURLs:(NSInteger)numberOfPrefetchURLs {
-    SCPictureBrowser *browser = [[SCPictureBrowser alloc] init];
-    browser.items = items;
-    browser.currentPage = currentPage;
-    browser.numberOfPrefetchURLs = numberOfPrefetchURLs;
-    return browser;
+{
+    UICollectionView *_collectionView;
+    UIPageControl *_pageControl;
 }
 
 #pragma mark - Life Cycle
@@ -60,42 +52,49 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
     self.view.backgroundColor = [UIColor blackColor];
 }
 
-#pragma mark - Getter
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    [self initializeCollectionView];
+    [self initializePageControl];
 
-- (UICollectionView *)collectionView {
-    if (!_collectionView) {
-        CGRect frame = self.view.frame;
-        frame.size.width += SCPictureCellRightMargin;
-        
-        UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
-        layout.itemSize = frame.size;
-        layout.minimumInteritemSpacing = 0;
-        layout.minimumLineSpacing = 0;
-        layout.sectionInset = UIEdgeInsetsZero;
-        layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
-        
-        UICollectionView *collectionView = [[UICollectionView alloc] initWithFrame:frame collectionViewLayout:layout];
-        collectionView.dataSource = self;
-        collectionView.delegate = self;
-        [collectionView registerClass:[SCPictureCell class] forCellWithReuseIdentifier:reuseIdentifier];
-        collectionView.showsHorizontalScrollIndicator = NO;
-        collectionView.pagingEnabled = YES;
-        collectionView.backgroundColor = [UIColor clearColor];
-        [self.view addSubview:collectionView];
-        
-        _collectionView = collectionView;
-    }
-    return _collectionView;
+    self.statusBarHidden = [UIApplication sharedApplication].isStatusBarHidden;
+    [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationNone];
 }
 
-- (UIPageControl *)pageControl {
-    if (!_pageControl) {
-        UIPageControl *pageControl = [[UIPageControl alloc] init];
-        pageControl.hidden = YES;
-        [self.view addSubview:pageControl];
-        _pageControl = pageControl;
-    }
-    return _pageControl;
+- (void)initializeCollectionView {
+    CGRect frame = self.view.frame;
+    frame.size.width += SCPictureCellRightMargin;
+    
+    UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
+    layout.itemSize = frame.size;
+    layout.minimumInteritemSpacing = 0;
+    layout.minimumLineSpacing = 0;
+    layout.sectionInset = UIEdgeInsetsZero;
+    layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
+    
+    _collectionView = [[UICollectionView alloc] initWithFrame:frame collectionViewLayout:layout];
+    _collectionView.dataSource = self;
+    _collectionView.delegate = self;
+    [_collectionView registerClass:[SCPictureCell class] forCellWithReuseIdentifier:reuseIdentifier];
+    _collectionView.showsHorizontalScrollIndicator = NO;
+    _collectionView.pagingEnabled = YES;
+    _collectionView.backgroundColor = [UIColor clearColor];
+    _collectionView.contentSize = CGSizeMake(_collectionView.frame.size.width * self.items.count, 0);
+    _collectionView.contentOffset = CGPointMake(self.currentPage * _collectionView.frame.size.width, 0);
+    [self.view addSubview:_collectionView];
+}
+
+- (void)initializePageControl {
+    _pageControl = [[UIPageControl alloc] init];
+    [self setPageControlHidden:YES];
+    _pageControl.currentPage = self.currentPage;
+    _pageControl.numberOfPages = self.items.count;
+    CGPoint center = _pageControl.center;
+    center.x = self.view.center.x;
+    center.y = CGRectGetMaxY(self.view.frame) - _pageControl.frame.size.height / 2 - 20;
+    _pageControl.center = center;
+    [self.view addSubview:_pageControl];
 }
 
 #pragma mark - Setter
@@ -103,8 +102,14 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
 - (void)setCurrentPage:(NSInteger)currentPage {
     if (_currentPage != currentPage) {
         _currentPage = currentPage;
-        self.pageControl.currentPage = currentPage;
-        [self prefetchPictures];
+        
+        if (self.isBrowsing) {
+            // 更新page
+            _pageControl.currentPage = currentPage;
+            
+            // 预加载图片
+            [self prefetchPictures];
+        }
     }
 }
 
@@ -132,34 +137,57 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
     [[SDWebImagePrefetcher sharedImagePrefetcher] prefetchURLs:[arrM copy]];
 }
 
+- (void)configureCellFirstWithItem:(SCPictureItem *)item cell:(SCPictureCell *)cell {
+    self.firstShow = NO;
+    [self prefetchPictures];
+    [[SDWebImageManager sharedManager].imageCache queryDiskCacheForKey:item.url.absoluteString done:^(UIImage *image, SDImageCacheType cacheType) {
+        // 取到了图片
+        if (image) {
+            cell.imageView.image = image;
+            // 第一次显示图片，转换坐标系，然后动画放大
+            cell.imageView.frame = [item.sourceView convertRect:item.sourceView.bounds toView:cell];
+            if (cacheType == SDImageCacheTypeMemory) { // 如果同步执行这段代码，坐标系转换会有bug，所以手动累加偏移量
+                CGRect frame = cell.imageView.frame;
+                frame.origin.x += (cell.frame.size.width * self.currentPage);
+                cell.imageView.frame = frame;
+            }
+            [UIView animateWithDuration:0.4 animations:^{
+                cell.imageView.frame = [cell imageViewRectWithImageSize:image.size];
+            } completion:^(BOOL finished) {
+                cell.enableDoubleTap = YES;
+                [cell setMaximumZoomScale];
+                [self setPageControlHidden:NO];
+            }];
+        } else {
+            [cell configureCellWithURL:item.url sourceView:item.sourceView];
+            [self setPageControlHidden:NO];
+        }
+    }];
+}
+
+- (void)setPageControlHidden:(BOOL)hidden {
+    if (hidden) {
+        _pageControl.hidden = YES;
+    } else {
+        if (self.items.count > 1 && !self.alwaysPageControlHidden) {
+            _pageControl.hidden = NO;
+        }
+    }
+}
+
 #pragma mark - Public Method
 
 - (void)show {
-    
     if (!self.items.count || self.currentPage > self.items.count - 1) {
         return;
     }
     
-    self.firstShow = YES;
-
-    [self prefetchPictures];
-
-    self.statusBarHidden = [UIApplication sharedApplication].isStatusBarHidden;
-    [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationNone];
-
-    self.collectionView.contentSize = CGSizeMake(self.collectionView.frame.size.width * self.items.count, 0);
-    self.collectionView.contentOffset = CGPointMake(self.currentPage * self.collectionView.frame.size.width, 0);
-    
-    self.pageControl.numberOfPages = self.items.count;
-    self.pageControl.currentPage = self.currentPage;
-    CGPoint center = self.pageControl.center;
-    center.x = self.view.center.x;
-    center.y = CGRectGetMaxY(self.view.frame) - self.pageControl.frame.size.height / 2 - 20;
-    self.pageControl.center = center;
-    
     UIWindow *window = [UIApplication sharedApplication].keyWindow;
     [window addSubview:self.view];
     [window.rootViewController addChildViewController:self];
+    
+    self.firstShow = YES;
+    self.browsing = YES;
 }
 
 #pragma mark - UICollectionViewDataSource
@@ -169,52 +197,16 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
-    
-    SCPictureItem *picture = self.items[indexPath.item];
     SCPictureCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:reuseIdentifier forIndexPath:indexPath];
-    
-    if (self.isFirstShow && indexPath.item == self.currentPage) {
-        [self.view bringSubviewToFront:self.pageControl];
-        
-        [[SDWebImageManager sharedManager].imageCache queryDiskCacheForKey:picture.url.absoluteString done:^(UIImage *image, SDImageCacheType cacheType) {
-            // 如果取到了图片
-            if (image) {
-                // 开始浏览
-                cell.imageView.image = image;
-                // 第一次显示图片，转换坐标系，然后动画放大
-                cell.imageView.frame = [picture.sourceView convertRect:picture.sourceView.bounds toView:cell];
-                if (cacheType == SDImageCacheTypeMemory) { // 如果同步执行这段代码，坐标系转换会有bug，所以手动累加偏移量
-                    CGRect frame = cell.imageView.frame;
-                    frame.origin.x += (cell.frame.size.width * self.currentPage);
-                    cell.imageView.frame = frame;
-                }
-                [UIView animateWithDuration:0.4 animations:^{
-                    cell.imageView.frame = [cell imageViewRectWithImageSize:image.size];
-                } completion:^(BOOL finished) {
-                    cell.enableDoubleTap = YES;
-                    if (self.items.count > 1) {
-                        self.pageControl.hidden = NO;
-                    }
-                    [cell setMaximumZoomScale];
-                }];
-            } else {
-                if (self.items.count > 1) {
-                    self.pageControl.hidden = NO;
-                }
-                [cell configureCellWithURL:picture.url sourceView:picture.sourceView];
-            }
-        }];
-        
-        self.firstShow = NO;
-        
-    } else {
-        if (self.items.count > 1) {
-            self.pageControl.hidden = NO;
-        }
-        [cell configureCellWithURL:picture.url sourceView:picture.sourceView];
-    }
-
     cell.delegate = self;
+    
+    SCPictureItem *item = self.items[indexPath.item];
+    if (self.isFirstShow) {
+        [self configureCellFirstWithItem:item cell:cell];
+    } else {
+        [cell configureCellWithURL:item.url sourceView:item.sourceView];
+        [self setPageControlHidden:NO];
+    }
     return cell;
 }
 
@@ -227,7 +219,7 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
 #pragma mark - SCPictureCellDelegate
 
 - (void)pictureCellSingleTap:(SCPictureCell *)pictureCell {
-    self.pageControl.hidden = YES;
+    [self setPageControlHidden:YES];
     [[UIApplication sharedApplication] setStatusBarHidden:self.isStatusBarHidden withAnimation:UIStatusBarAnimationNone];
     SCPictureItem *picture = self.items[self.currentPage];
     CGRect targetFrame = [picture.sourceView convertRect:picture.sourceView.bounds toView:pictureCell];
@@ -235,6 +227,7 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
         self.view.backgroundColor = [UIColor clearColor];
         pictureCell.imageView.frame = targetFrame;
     } completion:^(BOOL finished) {
+        self.browsing = NO;
         [self.view removeFromSuperview];
         [self removeFromParentViewController];
     }];

@@ -86,14 +86,6 @@ static CGFloat const SCMinMaximumZoomScale = 2;
     return image;
 }
 
-- (void)setMaximumZoomScale {
-    if (_scrollView.frame.size.height > self.imageView.frame.size.height * SCMinMaximumZoomScale) {
-        _scrollView.maximumZoomScale = self.frame.size.height / self.imageView.frame.size.height;
-    } else {
-        _scrollView.maximumZoomScale = SCMinMaximumZoomScale;
-    }
-}
-
 #pragma mark - Public Method
 
 - (void)configureCellWithURL:(NSURL *)url sourceView:(UIView *)sourceView {
@@ -159,6 +151,14 @@ static CGFloat const SCMinMaximumZoomScale = 2;
     CGFloat x = ([UIScreen mainScreen].bounds.size.width - size.width) / 2;
     CGFloat y = ([UIScreen mainScreen].bounds.size.height - size.height) / 2;
     return CGRectMake(x, y, size.width, size.height);
+}
+
+- (void)setMaximumZoomScale {
+    if (_scrollView.frame.size.height > self.imageView.frame.size.height * SCMinMaximumZoomScale) {
+        _scrollView.maximumZoomScale = self.frame.size.height / self.imageView.frame.size.height;
+    } else {
+        _scrollView.maximumZoomScale = SCMinMaximumZoomScale;
+    }
 }
 
 #pragma mark - GestureRecognizer

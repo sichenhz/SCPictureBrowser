@@ -31,7 +31,7 @@
     animation.fromValue = @(0);
     animation.toValue = @(M_PI * 2);
     animation.duration = 1.0;
-    animation.fillMode=kCAFillModeForwards;
+    animation.fillMode = kCAFillModeForwards;
     animation.removedOnCompletion = NO;
     animation.repeatCount = MAXFLOAT;
     [_imageView.layer addAnimation:animation forKey:@"rotation"];

@@ -13,6 +13,7 @@
 @implementation ViewController
 {
     NSArray *_items;
+    SCPictureBrowser *_browser;
 }
 
 - (void)viewDidLoad {
@@ -58,13 +59,15 @@
         [arrM addObject:item];
     }
     _items = [arrM copy];
+    
+    _browser = [[SCPictureBrowser alloc] init];
 }
 
 - (void)imageViewPressed:(UITapGestureRecognizer *)gesture {
-    SCPictureBrowser *browser = [SCPictureBrowser browserWithItems:_items
-                                                       currentPage:gesture.view.tag
-                                              numberOfPrefetchURLs:2];
-    [browser show];
+    _browser.items = _items;
+    _browser.currentPage = gesture.view.tag;
+    _browser.numberOfPrefetchURLs = 1;
+    [_browser show];
 }
 
 @end

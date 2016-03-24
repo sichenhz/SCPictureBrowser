@@ -21,15 +21,18 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface SCPictureBrowser : UIViewController
 
-+ (instancetype)browserWithItems:(nonnull NSArray *)items currentPage:(NSInteger)currentPage numberOfPrefetchURLs:(NSInteger)numberOfPrefetchURLs;
-
-@property (nonnull, nonatomic, strong, readonly) NSArray <SCPictureItem *> *items;
-@property (nonatomic, readonly) NSInteger currentPage;
+@property (nonnull, nonatomic, strong) NSArray <SCPictureItem *> *items;
+@property (nonatomic) NSInteger currentPage;
 
 /**
- *  浏览时预加载前后n张图片，n默认为0（微信朋友圈的策略：在wifi情况下预加载前后2张，在非wifi环境下预加载前后1张）
+ *  浏览时预加载前后n张图片，默认为0（微信朋友圈的策略：在wifi情况下预加载前后2张，在非wifi环境下预加载前后1张）
  */
 @property (nonatomic) NSInteger numberOfPrefetchURLs;
+
+/**
+ *  总是隐藏pageControl，默认为NO
+ */
+@property (nonatomic) BOOL alwaysPageControlHidden;
 
 - (void)show;
 
