@@ -195,6 +195,7 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
                     if (self.items.count > 1) {
                         self.pageControl.hidden = NO;
                     }
+                    [cell setMaximumZoomScale];
                 }];
             } else {
                 if (self.items.count > 1) {

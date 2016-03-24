@@ -22,6 +22,7 @@ extern CGFloat const SCPictureCellRightMargin;
 
 - (void)configureCellWithURL:(nonnull NSURL *)url sourceView:(nonnull UIView *)sourceView;
 - (CGRect)imageViewRectWithImageSize:(CGSize)imageSize;
+- (void)setMaximumZoomScale;
 
 @end
 
