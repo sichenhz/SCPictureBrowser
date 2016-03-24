@@ -60,6 +60,10 @@ CGFloat const SCPictureCellRightMargin = 20;
 
 - (void)configureCellWithURL:(NSURL *)url sourceView:(UIView *)sourceView {
 
+    if (self.indicator.isAnimating) {
+        [self.indicator stopAnimating];
+    }
+    
     // 尝试从缓存里取图片
     [[SDWebImageManager sharedManager].imageCache queryDiskCacheForKey:url.absoluteString done:^(UIImage *image, SDImageCacheType cacheType) {
         // 如果没有取到图片
