@@ -12,10 +12,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface SCPictureItem : NSObject
 
-+ (instancetype)itemWithURL:(nonnull NSURL *)url sourceView:(nonnull UIView *)sourceView;
-
-@property (nonnull, nonatomic, strong, readonly) NSURL *url;
-@property (nonnull, nonatomic, strong, readonly) UIView *sourceView;
+@property (nonnull, nonatomic, strong) NSURL *url;
+@property (nonnull, nonatomic, strong) UIView *sourceView;
 
 @end
 

@@ -11,25 +11,11 @@
 #import "SDWebImageManager.h"
 #import "SDWebImagePrefetcher.h"
 
-static NSString * const reuseIdentifier = @"SCPictureCell";
-
-@interface SCPictureItem()
-
-@property (nonnull, nonatomic, strong, readwrite) NSURL *url;
-@property (nonnull, nonatomic, strong, readwrite) UIView *sourceView;
-
-@end
-
 @implementation SCPictureItem
 
-+ (instancetype)itemWithURL:(nonnull NSURL *)url sourceView:(nonnull UIView *)sourceView {
-    SCPictureItem *item = [[SCPictureItem alloc] init];
-    item.url = url;
-    item.sourceView = sourceView;
-    return item;
-}
-
 @end
+
+static NSString * const reuseIdentifier = @"SCPictureCell";
 
 @interface SCPictureBrowser()<UICollectionViewDataSource, UICollectionViewDelegate, SCPictureDelegate, UIScrollViewDelegate>
 
@@ -60,6 +46,9 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
 
     self.statusBarHidden = [UIApplication sharedApplication].isStatusBarHidden;
     [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationNone];
+    
+    self.firstShow = YES;
+    self.browsing = YES;
 }
 
 - (void)initializeCollectionView {
@@ -88,13 +77,25 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
 - (void)initializePageControl {
     _pageControl = [[UIPageControl alloc] init];
     [self setPageControlHidden:YES];
-    _pageControl.currentPage = self.currentPage;
     _pageControl.numberOfPages = self.items.count;
+    _pageControl.currentPage = self.currentPage;
     CGPoint center = _pageControl.center;
     center.x = self.view.center.x;
     center.y = CGRectGetMaxY(self.view.frame) - _pageControl.frame.size.height / 2 - 20;
     _pageControl.center = center;
     [self.view addSubview:_pageControl];
+}
+
+#pragma mark - Public Method
+
+- (void)show {
+    if (!self.items.count || self.currentPage > self.items.count - 1) {
+        return;
+    }
+    
+    UIWindow *window = [UIApplication sharedApplication].keyWindow;
+    [window addSubview:self.view];
+    [window.rootViewController addChildViewController:self];    
 }
 
 #pragma mark - Setter
@@ -173,21 +174,6 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
             _pageControl.hidden = NO;
         }
     }
-}
-
-#pragma mark - Public Method
-
-- (void)show {
-    if (!self.items.count || self.currentPage > self.items.count - 1) {
-        return;
-    }
-    
-    UIWindow *window = [UIApplication sharedApplication].keyWindow;
-    [window addSubview:self.view];
-    [window.rootViewController addChildViewController:self];
-    
-    self.firstShow = YES;
-    self.browsing = YES;
 }
 
 #pragma mark - UICollectionViewDataSource

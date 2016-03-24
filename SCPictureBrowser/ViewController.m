@@ -13,7 +13,6 @@
 @implementation ViewController
 {
     NSArray *_items;
-    SCPictureBrowser *_browser;
 }
 
 - (void)viewDidLoad {
@@ -55,19 +54,20 @@
         [self.view addSubview:imageView];
         
         NSString *url = [urls[i] stringByReplacingOccurrencesOfString:@"thumbnail" withString:@"bmiddle"];
-        SCPictureItem *item = [SCPictureItem itemWithURL:[NSURL URLWithString:url] sourceView:imageView];
+        SCPictureItem *item = [[SCPictureItem alloc] init];
+        item.url = [NSURL URLWithString:url];
+        item.sourceView = imageView;
         [arrM addObject:item];
     }
     _items = [arrM copy];
-    
-    _browser = [[SCPictureBrowser alloc] init];
 }
 
 - (void)imageViewPressed:(UITapGestureRecognizer *)gesture {
-    _browser.items = _items;
-    _browser.currentPage = gesture.view.tag;
-    _browser.numberOfPrefetchURLs = 1;
-    [_browser show];
+    SCPictureBrowser *browser = [[SCPictureBrowser alloc] init];
+    browser.items = _items;
+    browser.currentPage = gesture.view.tag;
+    browser.numberOfPrefetchURLs = 1;
+    [browser show];
 }
 
 @end
