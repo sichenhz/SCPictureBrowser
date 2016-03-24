@@ -21,6 +21,7 @@ static CGFloat const SCMinMaximumZoomScale = 2;
 {
     UIScrollView *_scrollView;
     SCActivityIndicatorView *_indicatorView;
+    NSURL *_url;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame {
@@ -38,6 +39,10 @@ static CGFloat const SCMinMaximumZoomScale = 2;
     [super prepareForReuse];
     
     self.enableDoubleTap = NO;
+    
+    if (_indicatorView.isAnimating) {
+        [_indicatorView stopAnimating];
+    }
 }
 
 #pragma mark - Private Method
@@ -90,9 +95,7 @@ static CGFloat const SCMinMaximumZoomScale = 2;
 
 - (void)configureCellWithURL:(NSURL *)url sourceView:(UIView *)sourceView {
     
-    if (_indicatorView.isAnimating) {
-        [_indicatorView stopAnimating];
-    }
+    _url = url;
     
     // 尝试从缓存里取图片
     [[SDWebImageManager sharedManager].imageCache queryDiskCacheForKey:url.absoluteString done:^(UIImage *image, SDImageCacheType cacheType) {
@@ -108,18 +111,21 @@ static CGFloat const SCMinMaximumZoomScale = 2;
             
             // 下载图片
             [[SDWebImageManager sharedManager] downloadImageWithURL:url options:SDWebImageLowPriority | SDWebImageRetryFailed progress:nil completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
-                // 结束loading
-                [_indicatorView stopAnimating];
                 
-                // 成功下载图片
-                if (image) {
-                    self.enableDoubleTap = YES;
-                    self.imageView.image = image;
-                    [UIView animateWithDuration:0.4 animations:^{
-                        self.imageView.frame = [self imageViewRectWithImageSize:image.size];
-                    } completion:^(BOOL finished) {
-                        [self setMaximumZoomScale];
-                    }];
+                if ([imageURL isEqual:_url]) {
+                    // 结束loading
+                    [_indicatorView stopAnimating];
+                    
+                    // 成功下载图片
+                    if (image) {
+                        self.enableDoubleTap = YES;
+                        self.imageView.image = image;
+                        [UIView animateWithDuration:0.4 animations:^{
+                            self.imageView.frame = [self imageViewRectWithImageSize:image.size];
+                        } completion:^(BOOL finished) {
+                            [self setMaximumZoomScale];
+                        }];
+                    }
                 }
             }];
         }
