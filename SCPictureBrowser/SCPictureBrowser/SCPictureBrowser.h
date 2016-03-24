@@ -10,10 +10,12 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@protocol SCPictureBrowserDelegate;
+
 @interface SCPictureItem : NSObject
 
 @property (nonnull, nonatomic, strong) NSURL *url;
-@property (nonnull, nonatomic, strong) UIView *sourceView;
+@property (nullable, nonatomic, strong) UIView *sourceView;
 
 @end
 
@@ -21,6 +23,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonnull, nonatomic, strong) NSArray <SCPictureItem *> *items;
 @property (nonatomic) NSInteger currentPage;
+
+@property (nonatomic, weak) id<SCPictureBrowserDelegate> delegate;
 
 /**
  *  浏览时预加载前后n张图片，默认为0（微信朋友圈的策略：在wifi情况下预加载前后2张，在非wifi环境下预加载前后1张）
@@ -33,6 +37,14 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) BOOL alwaysPageControlHidden;
 
 - (void)show;
+
+@end
+
+@protocol SCPictureBrowserDelegate <NSObject>
+
+@optional
+
+- (void)pictureBrowser:(SCPictureBrowser *)browser didChangePageAtIndex:(NSInteger)index;
 
 @end
 

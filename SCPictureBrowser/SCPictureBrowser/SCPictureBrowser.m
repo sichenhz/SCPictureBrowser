@@ -111,10 +111,26 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
             // 预加载图片
             [self prefetchPictures];
         }
+        
+        if ([self.delegate respondsToSelector:@selector(pictureBrowser:didChangePageAtIndex:)]) {
+            [self.delegate pictureBrowser:self didChangePageAtIndex:currentPage];
+        }
     }
 }
 
+- (void)setItems:(NSArray<SCPictureItem *> *)items {
+    _items = [items copy];
+    [self layoutData];
+}
+
 #pragma mark - Private Method
+
+- (void)layoutData {
+    _collectionView.contentSize = CGSizeMake(_collectionView.frame.size.width * self.items.count, 0);
+    _collectionView.contentOffset = CGPointMake(self.currentPage * _collectionView.frame.size.width, 0);
+    _pageControl.numberOfPages = self.items.count;
+    [_collectionView reloadData];
+}
 
 - (void)prefetchPictures {
     if (self.numberOfPrefetchURLs <= 0) {
@@ -208,7 +224,13 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
     [self setPageControlHidden:YES];
     [[UIApplication sharedApplication] setStatusBarHidden:self.isStatusBarHidden withAnimation:UIStatusBarAnimationNone];
     SCPictureItem *picture = self.items[self.currentPage];
-    CGRect targetFrame = [picture.sourceView convertRect:picture.sourceView.bounds toView:pictureCell];
+    
+    CGRect targetFrame = CGRectZero;
+    if (picture.sourceView) {
+        targetFrame = [picture.sourceView convertRect:picture.sourceView.bounds toView:pictureCell];
+    } else {
+        targetFrame = CGRectMake(self.view.frame.size.width / 2, self.view.frame.size.height / 2, 0, 0);
+    }
     [UIView animateWithDuration:0.4 animations:^{
         self.view.backgroundColor = [UIColor clearColor];
         pictureCell.imageView.frame = targetFrame;
