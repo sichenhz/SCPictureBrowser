@@ -11,57 +11,41 @@
 #import "SCActivityIndicatorView.h"
 
 CGFloat const SCPictureCellRightMargin = 20;
+static CGFloat const SCMinMaximumZoomScale = 2;
 
 @interface SCPictureCell()<UIScrollViewDelegate>
-
-@property (nonatomic, weak) UIScrollView *scrollView;
-@property (nonatomic, weak) SCActivityIndicatorView *indicator;
 
 @end
 
 @implementation SCPictureCell
+{
+    UIScrollView *_scrollView;
+    SCActivityIndicatorView *_indicatorView;
+}
 
 - (instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
         
-        // scrollView
-        UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width - SCPictureCellRightMargin, frame.size.height)];
-        scrollView.showsHorizontalScrollIndicator = NO;
-        scrollView.showsVerticalScrollIndicator = NO;
-        scrollView.delegate = self;
-        [self addSubview:scrollView];
-        _scrollView = scrollView;
-        
-        // imageView
-        UIImageView *imageView = [[UIImageView alloc] init];
-        imageView.contentMode = UIViewContentModeScaleAspectFill;
-        imageView.clipsToBounds = YES;
-        [scrollView addSubview:imageView];
-        _imageView = imageView;
-        
-        // indicator
-        SCActivityIndicatorView *indicator = [[SCActivityIndicatorView alloc] init];
-        indicator.center = scrollView.center;
-        [self addSubview:indicator];
-        _indicator = indicator;
-        
-        // gesture
-        UITapGestureRecognizer *singleTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(singleTapHandler:)];
-        UITapGestureRecognizer *doubleTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleTapHandler:)];
-        UILongPressGestureRecognizer *longPressGesture = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPressHandler:)];
-        doubleTapGesture.numberOfTapsRequired = 2;
-        [singleTapGesture requireGestureRecognizerToFail:doubleTapGesture];
-        [self addGestureRecognizer:singleTapGesture];
-        [self addGestureRecognizer:doubleTapGesture];
-        [self addGestureRecognizer:longPressGesture];
+        [self initializeScrollViewWithFrame:frame];
+        [self initializeImageView];
+        [self initializeIndicatorView];
+        [self initializeGesture];
     }
     return self;
 }
 
-- (void)configureCellWithURL:(NSURL *)url sourceView:(UIView *)sourceView {
+- (void)prepareForReuse {
+    [super prepareForReuse];
+    
+    self.enableDoubleTap = NO;
+}
 
-    if (self.indicator.isAnimating) {
-        [self.indicator stopAnimating];
+#pragma mark - Public Method
+
+- (void)configureCellWithURL:(NSURL *)url sourceView:(UIView *)sourceView {
+    
+    if (_indicatorView.isAnimating) {
+        [_indicatorView stopAnimating];
     }
     
     // 尝试从缓存里取图片
@@ -69,92 +53,46 @@ CGFloat const SCPictureCellRightMargin = 20;
         // 如果没有取到图片
         if (!image) {
             // 设置缩略图
-            self.imageView.image = [self thumbnailImage:sourceView];
-            self.imageView.frame = CGRectMake(0, 0, sourceView.frame.size.width, sourceView.frame.size.height);
-            self.imageView.center = [UIApplication sharedApplication].keyWindow.center;
+            _imageView.image = [self thumbnailImage:sourceView];
+            _imageView.frame = CGRectMake(0, 0, sourceView.frame.size.width, sourceView.frame.size.height);
+            _imageView.center = [UIApplication sharedApplication].keyWindow.center;
             
             // loading
-            [self.indicator startAnimating];
+            [_indicatorView startAnimating];
             
             // 下载图片
             [[SDWebImageManager sharedManager] downloadImageWithURL:url options:SDWebImageLowPriority | SDWebImageRetryFailed progress:nil completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
                 // 结束loading
-                [self.indicator stopAnimating];
+                [_indicatorView stopAnimating];
                 
                 // 成功下载图片
                 if (image) {
                     self.enableDoubleTap = YES;
-                    self.imageView.image = image;
+                    _imageView.image = image;
                     CGRect imageViewFrame = [self imageViewRectWithImageSize:image.size];
                     
                     [UIView animateWithDuration:0.4 animations:^{
-                        self.imageView.frame = imageViewFrame;
+                        _imageView.frame = imageViewFrame;
                     }];
                 }
             }];
         }
         // 从缓存中取到了图片
         else {
-            if (self.scrollView.zoomScale > 1) {
-                [self.scrollView setZoomScale:1 animated:NO];
+            if (_scrollView.zoomScale > 1) {
+                [_scrollView setZoomScale:1 animated:NO];
             }
             
             self.enableDoubleTap = YES;
-            self.imageView.image = image;
-            self.imageView.frame = [self imageViewRectWithImageSize:image.size];
+            _imageView.image = image;
+            _imageView.frame = [self imageViewRectWithImageSize:image.size];
         }
     }];
 }
 
-#pragma mark - GestureRecognizer
-
-- (void)singleTapHandler:(UITapGestureRecognizer *)singleTap {
-    if (self.scrollView.zoomScale > 1) {
-        [self.scrollView setZoomScale:1 animated:YES];
-    } else {
-        if (self.indicator.isAnimating) {
-            [self.indicator stopAnimating];
-        }
-    }
-    if ([self.delegate respondsToSelector:@selector(pictureCellSingleTap:)]) {
-        [self.delegate pictureCellSingleTap:self];
-    }
-}
-
-- (void)doubleTapHandler:(UITapGestureRecognizer *)doubleTap {
-    
-    if (!self.enableDoubleTap) {
-        return;
-    }
-    
-    CGPoint point = [doubleTap locationInView:doubleTap.view];
-    if (self.scrollView.zoomScale <= 1) {
-        if (self.imageView.frame.size.height * 2 < self.frame.size.height) {
-            self.scrollView.maximumZoomScale = self.frame.size.height / self.imageView.frame.size.height;
-        } else {
-            self.scrollView.maximumZoomScale = 2;
-        }
-        [self.scrollView zoomToRect:CGRectMake(point.x, point.y, 1, 1) animated:YES];
-    } else {
-        [self.scrollView setZoomScale:self.scrollView.minimumZoomScale animated:YES];
-    }
-}
-
-- (void)longPressHandler:(UILongPressGestureRecognizer *)longPress {
-    if ([self.delegate respondsToSelector:@selector(pictureCellLongPress:)]) {
-        [self.delegate pictureCellLongPress:self];
-    }
-}
-
-#pragma mark - Private Method
-
-/**
- *  计算适合屏幕大小的frmae
- */
 - (CGRect)imageViewRectWithImageSize:(CGSize)imageSize {
     CGFloat heightRatio = imageSize.height / [UIScreen mainScreen].bounds.size.height;
     CGFloat widthRatio = imageSize.width / [UIScreen mainScreen].bounds.size.width;
-    
     CGSize size = CGSizeZero;
     if (heightRatio > 1 && widthRatio <= 1) {
         size = [self ratioSize:imageSize ratio:heightRatio];
@@ -166,6 +104,40 @@ CGFloat const SCPictureCellRightMargin = 20;
     CGFloat x = ([UIScreen mainScreen].bounds.size.width - size.width) / 2;
     CGFloat y = ([UIScreen mainScreen].bounds.size.height - size.height) / 2;
     return CGRectMake(x, y, size.width, size.height);
+}
+
+#pragma mark - Private Method
+
+- (void)initializeScrollViewWithFrame:(CGRect)frame {
+    _scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width - SCPictureCellRightMargin, frame.size.height)];
+    _scrollView.showsHorizontalScrollIndicator = NO;
+    _scrollView.showsVerticalScrollIndicator = NO;
+    _scrollView.delegate = self;
+    [self addSubview:_scrollView];
+}
+
+- (void)initializeImageView {
+    _imageView = [[UIImageView alloc] init];
+    _imageView.contentMode = UIViewContentModeScaleAspectFill;
+    _imageView.clipsToBounds = YES;
+    [_scrollView addSubview:_imageView];
+}
+
+- (void)initializeIndicatorView {
+    _indicatorView = [[SCActivityIndicatorView alloc] init];
+    _indicatorView.center = _scrollView.center;
+    [self addSubview:_indicatorView];
+}
+
+- (void)initializeGesture {
+    UITapGestureRecognizer *singleTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(singleTapHandler:)];
+    UITapGestureRecognizer *doubleTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleTapHandler:)];
+    UILongPressGestureRecognizer *longPressGesture = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPressHandler:)];
+    doubleTapGesture.numberOfTapsRequired = 2;
+    [singleTapGesture requireGestureRecognizerToFail:doubleTapGesture];
+    [self addGestureRecognizer:singleTapGesture];
+    [self addGestureRecognizer:doubleTapGesture];
+    [self addGestureRecognizer:longPressGesture];
 }
 
 - (CGSize)ratioSize:(CGSize)originSize ratio:(CGFloat)ratio {
@@ -180,10 +152,47 @@ CGFloat const SCPictureCellRightMargin = 20;
     return image;
 }
 
+#pragma mark - GestureRecognizer
+
+- (void)singleTapHandler:(UITapGestureRecognizer *)singleTap {
+    if (_scrollView.zoomScale > _scrollView.minimumZoomScale) {
+        [_scrollView setZoomScale:_scrollView.minimumZoomScale animated:YES];
+    } else if (_indicatorView.isAnimating) {
+        [_indicatorView stopAnimating];
+    }
+    if ([self.delegate respondsToSelector:@selector(pictureCellSingleTap:)]) {
+        [self.delegate pictureCellSingleTap:self];
+    }
+}
+
+- (void)doubleTapHandler:(UITapGestureRecognizer *)doubleTap {
+    if (!self.enableDoubleTap) {
+        return;
+    }
+    
+    if (_scrollView.zoomScale > _scrollView.minimumZoomScale) {
+        [_scrollView setZoomScale:_scrollView.minimumZoomScale animated:YES];
+    } else {
+        if (_scrollView.frame.size.height > _imageView.frame.size.height * SCMinMaximumZoomScale) {
+            _scrollView.maximumZoomScale = self.frame.size.height / _imageView.frame.size.height;
+        } else {
+            _scrollView.maximumZoomScale = SCMinMaximumZoomScale;
+        }
+        CGPoint point = [doubleTap locationInView:doubleTap.view];
+        [_scrollView zoomToRect:CGRectMake(point.x, point.y, 1, 1) animated:YES];
+    }
+}
+
+- (void)longPressHandler:(UILongPressGestureRecognizer *)longPress {
+    if ([self.delegate respondsToSelector:@selector(pictureCellLongPress:)]) {
+        [self.delegate pictureCellLongPress:self];
+    }
+}
+
 #pragma mark - UIScrollViewDelegate
 
 - (UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView {
-    return self.imageView;
+    return _imageView;
 }
 
 - (void)scrollViewDidZoom:(UIScrollView *)scrollView {
@@ -194,7 +203,7 @@ CGFloat const SCPictureCellRightMargin = 20;
     CGPoint actualCenter = CGPointMake(scrollView.contentSize.width * 0.5 + offsetX,
                                        scrollView.contentSize.height * 0.5 + offsetY);
 
-    self.imageView.center = actualCenter;
+    _imageView.center = actualCenter;
 }
 
 @end

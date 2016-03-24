@@ -8,18 +8,19 @@
 
 #import <UIKit/UIKit.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 extern CGFloat const SCPictureCellRightMargin;
 
 @protocol SCPictureDelegate;
 
 @interface SCPictureCell : UICollectionViewCell
 
-@property (nonatomic, weak, readonly) UIImageView *imageView;
+@property (nonatomic, strong, readonly, nonnull) UIImageView *imageView;
 @property (nonatomic, weak) id<SCPictureDelegate> delegate;
 @property (nonatomic) BOOL enableDoubleTap;
 
-- (void)configureCellWithURL:(NSURL *)url sourceView:(UIView *)sourceView;
-
+- (void)configureCellWithURL:(nonnull NSURL *)url sourceView:(nonnull UIView *)sourceView;
 - (CGRect)imageViewRectWithImageSize:(CGSize)imageSize;
 
 @end
@@ -30,3 +31,5 @@ extern CGFloat const SCPictureCellRightMargin;
 - (void)pictureCellLongPress:(SCPictureCell *)pictureCell;
 
 @end
+
+NS_ASSUME_NONNULL_END
