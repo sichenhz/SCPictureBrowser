@@ -30,6 +30,7 @@
 		255230891C9FF2AD009F3091 /* UIImageView+WebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 2552307A1C9FF2AD009F3091 /* UIImageView+WebCache.m */; };
 		2552308A1C9FF2AD009F3091 /* UIView+WebCacheOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 2552307C1C9FF2AD009F3091 /* UIView+WebCacheOperation.m */; };
 		2552308D1C9FFCDB009F3091 /* SCPictureCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2552308C1C9FFCDB009F3091 /* SCPictureCell.m */; };
+		25E2809F1CA3D6560052E818 /* SCPictureBrowser.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 25E2809E1CA3D6560052E818 /* SCPictureBrowser.bundle */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -78,6 +79,7 @@
 		2552307C1C9FF2AD009F3091 /* UIView+WebCacheOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+WebCacheOperation.m"; sourceTree = "<group>"; };
 		2552308B1C9FFCDB009F3091 /* SCPictureCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SCPictureCell.h; path = SCPictureBrowser/SCPictureBrowser/SCPictureCell.h; sourceTree = SOURCE_ROOT; };
 		2552308C1C9FFCDB009F3091 /* SCPictureCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SCPictureCell.m; path = SCPictureBrowser/SCPictureBrowser/SCPictureCell.m; sourceTree = SOURCE_ROOT; };
+		25E2809E1CA3D6560052E818 /* SCPictureBrowser.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = SCPictureBrowser.bundle; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -136,6 +138,7 @@
 			isa = PBXGroup;
 			children = (
 				2552305E1C9FF295009F3091 /* Lib */,
+				25E2809E1CA3D6560052E818 /* SCPictureBrowser.bundle */,
 				2552305B1C9FE09D009F3091 /* SCPictureBrowser.h */,
 				2552305C1C9FE09D009F3091 /* SCPictureBrowser.m */,
 				2552308B1C9FFCDB009F3091 /* SCPictureCell.h */,
@@ -248,6 +251,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				255230501C9FE016009F3091 /* LaunchScreen.storyboard in Resources */,
+				25E2809F1CA3D6560052E818 /* SCPictureBrowser.bundle in Resources */,
 				2552304D1C9FE016009F3091 /* Assets.xcassets in Resources */,
 				2552304B1C9FE016009F3091 /* Main.storyboard in Resources */,
 			);

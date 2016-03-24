@@ -97,11 +97,7 @@ CGFloat const SCPictureCellRightMargin = 20;
             
             self.enableDoubleTap = YES;
             self.imageView.image = image;
-            CGRect imageViewFrame = [self imageViewRectWithImageSize:image.size];
-            
-            if (CGRectEqualToRect(self.imageView.frame, CGRectZero)) {
-                self.imageView.frame = imageViewFrame;
-            }
+            self.imageView.frame = [self imageViewRectWithImageSize:image.size];
         }
     }];
 }
