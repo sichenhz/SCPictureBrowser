@@ -24,6 +24,14 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     
+    CGSize size = CGSizeMake(1, 1);
+    UIGraphicsBeginImageContext(size);
+    CGContextRef ctx = UIGraphicsGetCurrentContext();
+    CGContextSetFillColorWithColor(ctx, [UIColor lightGrayColor].CGColor);
+    CGContextFillRect(ctx, CGRectMake(0, 0, size.width, size.height));
+    UIImage *placeholder = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    
     _urls = @[
               @"http://ww4.sinaimg.cn/thumbnail/7f8c1087gw1e9g06pc68ug20ag05y4qq.gif",
               @"http://ww3.sinaimg.cn/thumbnail/8e88b0c1gw1e9lpr0nly5j20pf0gygo6.jpg",
@@ -37,12 +45,13 @@
               ];
 
     _items = [NSMutableArray array];
+    
     for (NSInteger i = 0; i < _urls.count; i++) {
         UIImageView *imageView = [[UIImageView alloc] init];
         imageView.userInteractionEnabled = YES;
         imageView.contentMode = UIViewContentModeScaleAspectFill;
         imageView.clipsToBounds = YES;
-        [imageView sd_setImageWithURL:[NSURL URLWithString:_urls[i]]];
+        [imageView sd_setImageWithURL:[NSURL URLWithString:_urls[i]] placeholderImage:placeholder];
         CGFloat w = 60;
         CGFloat h = 60;
         NSInteger columns = 3;
@@ -73,16 +82,6 @@
     browser.currentPage = gesture.view.tag;
     browser.numberOfPrefetchURLs = 0;
     [browser show];
-}
-
-- (void)pictureBrowser:(SCPictureBrowser *)browser didChangePageAtIndex:(NSInteger)index {
-    if (index == 8 && _items.count == 9) {
-        NSString *url = [_urls[1] stringByReplacingOccurrencesOfString:@"thumbnail" withString:@"bmiddle"];
-        SCPictureItem *item = [[SCPictureItem alloc] init];
-        item.url = [NSURL URLWithString:url];
-        [_items addObject:item];
-        browser.items = _items;
-    }
 }
 
 @end

@@ -157,28 +157,37 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
 - (void)configureCellFirstWithItem:(SCPictureItem *)item cell:(SCPictureCell *)cell {
     self.firstShow = NO;
     [self prefetchPictures];
-    [[SDWebImageManager sharedManager].imageCache queryDiskCacheForKey:item.url.absoluteString done:^(UIImage *image, SDImageCacheType cacheType) {
-        // 取到了图片
-        if (image) {
-            cell.imageView.image = image;
-            // 第一次显示图片，转换坐标系，然后动画放大
-            cell.imageView.frame = [item.sourceView convertRect:item.sourceView.bounds toView:cell];
-            if (cacheType == SDImageCacheTypeMemory) { // 如果同步执行这段代码，坐标系转换会有bug，所以手动累加偏移量
-                CGRect frame = cell.imageView.frame;
-                frame.origin.x += (cell.frame.size.width * self.currentPage);
-                cell.imageView.frame = frame;
-            }
-            [UIView animateWithDuration:0.4 animations:^{
-                cell.imageView.frame = [cell imageViewRectWithImageSize:image.size];
-            } completion:^(BOOL finished) {
-                cell.enableDoubleTap = YES;
-                [cell setMaximumZoomScale];
+    
+    if (item.originImage) {
+        [self showImage:item.originImage item:item cell:cell cacheType:SDImageCacheTypeMemory];
+    }
+    else if (item.url) {
+        [[SDWebImageManager sharedManager].imageCache queryDiskCacheForKey:item.url.absoluteString done:^(UIImage *image, SDImageCacheType cacheType) {
+            if (image) {
+                [self showImage:image item:item cell:cell cacheType:cacheType];
+            } else {
+                [cell configureCellWithURL:item.url sourceView:item.sourceView];
                 [self setPageControlHidden:NO];
-            }];
-        } else {
-            [cell configureCellWithURL:item.url sourceView:item.sourceView];
-            [self setPageControlHidden:NO];
-        }
+            }
+        }];
+    }
+}
+
+- (void)showImage:(UIImage *)image item:(SCPictureItem *)item cell:(SCPictureCell *)cell cacheType:(SDImageCacheType)cacheType {
+    item.originImage = image;
+    cell.imageView.image = image;
+    cell.imageView.frame = [item.sourceView convertRect:item.sourceView.bounds toView:cell];
+    if (cacheType == SDImageCacheTypeMemory) { // 如果同步执行这段代码，坐标系转换会有bug，所以手动累加偏移量
+        CGRect frame = cell.imageView.frame;
+        frame.origin.x += (cell.frame.size.width * self.currentPage);
+        cell.imageView.frame = frame;
+    }
+    [UIView animateWithDuration:0.4 animations:^{
+        cell.imageView.frame = [cell imageViewRectWithImageSize:image.size];
+    } completion:^(BOOL finished) {
+        cell.enableDoubleTap = YES;
+        [cell setMaximumZoomScale];
+        [self setPageControlHidden:NO];
     }];
 }
 
@@ -221,19 +230,13 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
 #pragma mark - SCPictureCellDelegate
 
 - (void)pictureCellSingleTap:(SCPictureCell *)pictureCell {
-    [self setPageControlHidden:YES];
     [[UIApplication sharedApplication] setStatusBarHidden:self.isStatusBarHidden withAnimation:UIStatusBarAnimationNone];
-    SCPictureItem *picture = self.items[self.currentPage];
     
-    CGRect targetFrame = CGRectZero;
-    if (picture.sourceView) {
-        targetFrame = [picture.sourceView convertRect:picture.sourceView.bounds toView:pictureCell];
-    } else {
-        targetFrame = CGRectMake(self.view.frame.size.width / 2, self.view.frame.size.height / 2, 0, 0);
-    }
+    SCPictureItem *item = self.items[self.currentPage];
+    [self setPageControlHidden:YES];
     [UIView animateWithDuration:0.4 animations:^{
         self.view.backgroundColor = [UIColor clearColor];
-        pictureCell.imageView.frame = targetFrame;
+        pictureCell.imageView.frame = [item.sourceView convertRect:item.sourceView.bounds toView:pictureCell];
     } completion:^(BOOL finished) {
         self.browsing = NO;
         [self.view removeFromSuperview];
