@@ -102,9 +102,11 @@ static CGFloat const SCMinMaximumZoomScale = 2;
         // 如果没有取到图片
         if (!image) {
             // 设置缩略图
-            self.imageView.image = [self thumbnailImage:sourceView];
-            self.imageView.frame = CGRectMake(0, 0, sourceView.frame.size.width, sourceView.frame.size.height);
-            self.imageView.center = [UIApplication sharedApplication].keyWindow.center;
+            if (sourceView) {
+                self.imageView.image = [self thumbnailImage:sourceView];
+                self.imageView.frame = CGRectMake(0, 0, sourceView.frame.size.width, sourceView.frame.size.height);
+                self.imageView.center = [UIApplication sharedApplication].keyWindow.center;
+            }
             
             // loading
             [_indicatorView startAnimating];
@@ -120,11 +122,17 @@ static CGFloat const SCMinMaximumZoomScale = 2;
                     if (image) {
                         self.enableDoubleTap = YES;
                         self.imageView.image = image;
-                        [UIView animateWithDuration:0.4 animations:^{
+                        
+                        if (sourceView) {
+                            [UIView animateWithDuration:0.4 animations:^{
+                                self.imageView.frame = [self imageViewRectWithImageSize:image.size];
+                            } completion:^(BOOL finished) {
+                                [self setMaximumZoomScale];
+                            }];
+                        } else {
                             self.imageView.frame = [self imageViewRectWithImageSize:image.size];
-                        } completion:^(BOOL finished) {
                             [self setMaximumZoomScale];
-                        }];
+                        }
                     }
                 }
             }];
@@ -170,21 +178,25 @@ static CGFloat const SCMinMaximumZoomScale = 2;
 #pragma mark - GestureRecognizer
 
 - (void)singleTapHandler:(UITapGestureRecognizer *)singleTap {
+    if ([self.delegate respondsToSelector:@selector(pictureCellSingleTap:)]) {
+        [self.delegate pictureCellSingleTap:self];
+    }
+    
     if (_scrollView.zoomScale > _scrollView.minimumZoomScale) {
         [_scrollView setZoomScale:_scrollView.minimumZoomScale animated:YES];
     } else if (_indicatorView.isAnimating) {
         [_indicatorView stopAnimating];
     }
-    if ([self.delegate respondsToSelector:@selector(pictureCellSingleTap:)]) {
-        [self.delegate pictureCellSingleTap:self];
-    }
 }
 
 - (void)doubleTapHandler:(UITapGestureRecognizer *)doubleTap {
+    if ([self.delegate respondsToSelector:@selector(pictureCellDoubleTap:)]) {
+        [self.delegate pictureCellDoubleTap:self];
+    }
+    
     if (!self.enableDoubleTap) {
         return;
     }
-    
     if (_scrollView.zoomScale > _scrollView.minimumZoomScale) {
         [_scrollView setZoomScale:_scrollView.minimumZoomScale animated:YES];
     } else {

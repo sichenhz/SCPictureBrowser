@@ -18,14 +18,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nullable, nonatomic, strong) UIImage *originImage;
 
-@property (nonnull, nonatomic, strong) UIView *sourceView;
+@property (nullable, nonatomic, strong) UIView *sourceView;
 
 @end
 
 @interface SCPictureBrowser : UIViewController
 
 @property (nonnull, nonatomic, strong) NSArray <SCPictureItem *> *items;
-@property (nonatomic) NSInteger currentPage;
+@property (nonatomic) NSInteger index;
 
 @property (nonatomic, weak) id<SCPictureBrowserDelegate> delegate;
 
@@ -39,6 +39,9 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic) BOOL alwaysPageControlHidden;
 
+/**
+ *  如果通过present或push方式来浏览图片，需自己手动实现结束浏览的事件
+ */
 - (void)show;
 
 @end
@@ -47,6 +50,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @optional
 
+- (void)pictureBrowser:(SCPictureBrowser *)browser singleTapAtIndex:(NSInteger)index;
+- (void)pictureBrowser:(SCPictureBrowser *)browser doubleTapAtIndex:(NSInteger)index;
+- (void)pictureBrowser:(SCPictureBrowser *)browser longPressAtIndex:(NSInteger)index;
 - (void)pictureBrowser:(SCPictureBrowser *)browser didChangePageAtIndex:(NSInteger)index;
 
 @end

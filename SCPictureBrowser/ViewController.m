@@ -70,7 +70,7 @@
         NSString *url = [_urls[i] stringByReplacingOccurrencesOfString:@"thumbnail" withString:@"bmiddle"];
         SCPictureItem *item = [[SCPictureItem alloc] init];
         item.url = [NSURL URLWithString:url];
-        item.sourceView = imageView;
+//        item.sourceView = imageView;
         [_items addObject:item];
     }
 }
@@ -79,9 +79,10 @@
     SCPictureBrowser *browser = [[SCPictureBrowser alloc] init];
     browser.delegate = self;
     browser.items = _items;
-    browser.currentPage = gesture.view.tag;
+    browser.index = gesture.view.tag;
     browser.numberOfPrefetchURLs = 0;
     [browser show];
+//    [self presentViewController:browser animated:YES completion:nil];
 }
 
 @end
