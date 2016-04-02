@@ -254,8 +254,8 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
 #pragma mark - SCPictureCellDelegate
 
 - (void)pictureCellSingleTap:(SCPictureCell *)pictureCell {
-    if ([self.delegate respondsToSelector:@selector(pictureBrowser:singleTapAtIndex:)]) {
-        [self.delegate pictureBrowser:self singleTapAtIndex:self.index];
+    if ([self.delegate respondsToSelector:@selector(pictureBrowser:singleTapWithItem:)]) {
+        [self.delegate pictureBrowser:self singleTapWithItem:self.items[self.index]];
     }
     
     if (_isFromShowAction) {
@@ -267,10 +267,7 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
                 self.view.backgroundColor = [UIColor clearColor];
                 pictureCell.imageView.frame = [item.sourceView convertRect:item.sourceView.bounds toView:pictureCell];
             } else {
-//                pictureCell.alpha = 0;
-                CGRect frame = self.view.frame;
-                frame.origin.x += frame.size.width;
-                self.view.frame = frame;
+                self.view.alpha = 0;
             }
         } completion:^(BOOL finished) {
             self.browsing = NO;
@@ -281,14 +278,14 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
 }
 
 - (void)pictureCellDoubleTap:(SCPictureCell *)pictureCell {
-    if ([self.delegate respondsToSelector:@selector(pictureBrowser:doubleTapAtIndex:)]) {
-        [self.delegate pictureBrowser:self doubleTapAtIndex:self.index];
+    if ([self.delegate respondsToSelector:@selector(pictureBrowser:doubleTapWithItem:)]) {
+        [self.delegate pictureBrowser:self doubleTapWithItem:self.items[self.index]];
     }
 }
 
 - (void)pictureCellLongPress:(SCPictureCell *)pictureCell {
-    if ([self.delegate respondsToSelector:@selector(pictureBrowser:longPressAtIndex:)]) {
-        [self.delegate pictureBrowser:self longPressAtIndex:self.index];
+    if ([self.delegate respondsToSelector:@selector(pictureBrowser:longPressWithItem:)]) {
+        [self.delegate pictureBrowser:self longPressWithItem:self.items[self.index]];
     }
 }
 

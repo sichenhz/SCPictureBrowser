@@ -70,6 +70,8 @@
         NSString *url = [_urls[i] stringByReplacingOccurrencesOfString:@"thumbnail" withString:@"bmiddle"];
         SCPictureItem *item = [[SCPictureItem alloc] init];
         item.url = [NSURL URLWithString:url];
+        
+        // 如果sourceView为nil，则以其他动画开启和关闭
 //        item.sourceView = imageView;
         [_items addObject:item];
     }
@@ -82,7 +84,13 @@
     browser.index = gesture.view.tag;
     browser.numberOfPrefetchURLs = 0;
     [browser show];
+    
+    // 也可以通过present或push的方式打开browser
 //    [self presentViewController:browser animated:YES completion:nil];
+}
+
+- (void)pictureBrowser:(SCPictureBrowser *)browser singleTapWithItem:(nonnull SCPictureItem *)item {
+    [browser dismissViewControllerAnimated:YES completion:nil];
 }
 
 @end
