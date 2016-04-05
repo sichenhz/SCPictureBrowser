@@ -141,14 +141,18 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
     
     if (self.index >= self.numberOfPrefetchURLs) {
         for (NSInteger i = self.index - 1; i >= self.index - self.numberOfPrefetchURLs; i--) {
-            SCPictureItem *picture = self.items[i];
-            [arrM addObject:picture.url];
+            SCPictureItem *item = self.items[i];
+            if (!item.originImage && item.url) {
+                [arrM addObject:item.url];
+            }
         }
     }
     if (self.index <= (NSInteger)self.items.count - 1 - self.numberOfPrefetchURLs) {
         for (NSInteger i = self.index + 1; i <= self.index + self.numberOfPrefetchURLs; i++) {
-            SCPictureItem *picture = self.items[i];
-            [arrM addObject:picture.url];
+            SCPictureItem *item = self.items[i];
+            if (!item.originImage && item.url) {
+                [arrM addObject:item.url];
+            }
         }
     }
     [[SDWebImagePrefetcher sharedImagePrefetcher] prefetchURLs:[arrM copy]];
@@ -164,6 +168,7 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
     else if (item.url) {
         [[SDWebImageManager sharedManager].imageCache queryDiskCacheForKey:item.url.absoluteString done:^(UIImage *image, SDImageCacheType cacheType) {
             if (image) {
+                item.originImage = image;
                 [self showImage:image item:item cell:cell cacheType:cacheType];
             } else {
                 [cell showImageWithItem:item];
@@ -174,7 +179,6 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
 }
 
 - (void)showImage:(UIImage *)image item:(SCPictureItem *)item cell:(SCPictureCell *)cell cacheType:(SDImageCacheType)cacheType {
-    item.originImage = image;
     cell.imageView.image = image;
     
     if (item.sourceView) {
@@ -272,7 +276,7 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
 }
 
 - (void)pictureCellDoubleTap:(SCPictureCell *)pictureCell {
-
+    
 }
 
 - (void)pictureCellLongPress:(SCPictureCell *)pictureCell {

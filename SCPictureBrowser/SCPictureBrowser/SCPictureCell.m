@@ -93,69 +93,79 @@ static CGFloat const SCMinMaximumZoomScale = 2;
     return image;
 }
 
+- (void)showImage:(UIImage *)image {
+    if (_scrollView.zoomScale > 1) {
+        [_scrollView setZoomScale:1 animated:NO];
+    }
+    
+    self.enableDoubleTap = YES;
+    self.imageView.image = image;
+    self.imageView.frame = [self imageViewRectWithImageSize:image.size];
+    [self setMaximumZoomScale];
+}
+
 #pragma mark - Public Method
 
 - (void)showImageWithItem:(SCPictureItem *)item {
-
+    
     _url = item.url;
     
-    // 尝试从缓存里取图片
-    [[SDWebImageManager sharedManager].imageCache queryDiskCacheForKey:item.url.absoluteString done:^(UIImage *image, SDImageCacheType cacheType) {
-        // 如果没有取到图片
-        if (!image) {
-            // 设置缩略图
-            if (item.sourceView) {
-                self.imageView.image = [self thumbnailImage:item.sourceView];
-                self.imageView.frame = CGRectMake(0, 0, item.sourceView.frame.size.width, item.sourceView.frame.size.height);
-                self.imageView.center = [UIApplication sharedApplication].keyWindow.center;
-            }
-            
-            // loading
-            [_indicatorView startAnimating];
-            
-            // 下载图片
-            [[SDWebImageManager sharedManager] downloadImageWithURL:item.url options:SDWebImageLowPriority | SDWebImageRetryFailed progress:nil completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+    if (item.originImage) {
+        [self showImage:item.originImage];
+    }
+    else if (item.url) {
+        // 尝试从缓存里取图片
+        [[SDWebImageManager sharedManager].imageCache queryDiskCacheForKey:item.url.absoluteString done:^(UIImage *image, SDImageCacheType cacheType) {
+            // 如果没有取到图片
+            if (!image) {
+                // 设置缩略图
+                if (item.sourceView) {
+                    self.imageView.image = [self thumbnailImage:item.sourceView];
+                    self.imageView.frame = CGRectMake(0, 0, item.sourceView.frame.size.width, item.sourceView.frame.size.height);
+                    self.imageView.center = [UIApplication sharedApplication].keyWindow.center;
+                }
                 
-                if ([imageURL isEqual:_url]) {
-                    // 结束loading
-                    [_indicatorView stopAnimating];
+                // loading
+                [_indicatorView startAnimating];
+                
+                // 下载图片
+                [[SDWebImageManager sharedManager] downloadImageWithURL:item.url options:SDWebImageLowPriority | SDWebImageRetryFailed progress:nil completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
                     
-                    // 成功下载图片
-                    if (image) {
-                        self.enableDoubleTap = YES;
-                        item.originImage = image;
-                        self.imageView.image = image;
+                    if ([imageURL isEqual:_url]) {
+                        // 结束loading
+                        [_indicatorView stopAnimating];
                         
-                        if (item.sourceView) {
-                            [UIView animateWithDuration:0.4 animations:^{
+                        // 成功下载图片
+                        if (image) {
+                            self.enableDoubleTap = YES;
+                            item.originImage = image;
+                            self.imageView.image = image;
+                            
+                            if (item.sourceView) {
+                                [UIView animateWithDuration:0.4 animations:^{
+                                    self.imageView.frame = [self imageViewRectWithImageSize:image.size];
+                                } completion:^(BOOL finished) {
+                                    [self setMaximumZoomScale];
+                                }];
+                            } else {
                                 self.imageView.frame = [self imageViewRectWithImageSize:image.size];
-                            } completion:^(BOOL finished) {
                                 [self setMaximumZoomScale];
-                            }];
-                        } else {
-                            self.imageView.frame = [self imageViewRectWithImageSize:image.size];
-                            [self setMaximumZoomScale];
+                            }
+                        }
+                        // 下载图片失败
+                        else if (error) {
+                            [SCToastView showInView:_scrollView text:@"下载失败"];
                         }
                     }
-                    // 下载图片失败
-                    else if (error) {
-                        [SCToastView showInView:_scrollView text:@"下载失败"];
-                    }
-                }
-            }];
-        }
-        // 从缓存中取到了图片
-        else {
-            if (_scrollView.zoomScale > 1) {
-                [_scrollView setZoomScale:1 animated:NO];
+                }];
             }
-            
-            self.enableDoubleTap = YES;
-            self.imageView.image = image;
-            self.imageView.frame = [self imageViewRectWithImageSize:image.size];
-            [self setMaximumZoomScale];
-        }
-    }];
+            // 从缓存中取到了图片
+            else {
+                item.originImage = image;
+                [self showImage:image];
+            }
+        }];
+    }
 }
 
 - (CGRect)imageViewRectWithImageSize:(CGSize)imageSize {
@@ -231,7 +241,7 @@ static CGFloat const SCMinMaximumZoomScale = 2;
     (scrollView.bounds.size.height - scrollView.contentSize.height) * 0.5 : 0.0;
     CGPoint actualCenter = CGPointMake(scrollView.contentSize.width * 0.5 + offsetX,
                                        scrollView.contentSize.height * 0.5 + offsetY);
-
+    
     self.imageView.center = actualCenter;
 }
 
