@@ -252,10 +252,6 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
 #pragma mark - SCPictureCellDelegate
 
 - (void)pictureCellSingleTap:(SCPictureCell *)pictureCell {
-    if ([self.delegate respondsToSelector:@selector(pictureBrowser:singleTapWithItem:)]) {
-        [self.delegate pictureBrowser:self singleTapWithItem:self.items[self.index]];
-    }
-    
     if (_isFromShowAction) {
         [[UIApplication sharedApplication] setStatusBarHidden:self.isStatusBarHidden withAnimation:UIStatusBarAnimationNone];
         [self setPageControlHidden:YES];
@@ -276,16 +272,10 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
 }
 
 - (void)pictureCellDoubleTap:(SCPictureCell *)pictureCell {
-    if ([self.delegate respondsToSelector:@selector(pictureBrowser:doubleTapWithItem:)]) {
-        [self.delegate pictureBrowser:self doubleTapWithItem:self.items[self.index]];
-    }
+
 }
 
 - (void)pictureCellLongPress:(SCPictureCell *)pictureCell {
-    if ([self.delegate respondsToSelector:@selector(pictureBrowser:longPressWithItem:)]) {
-        [self.delegate pictureBrowser:self longPressWithItem:self.items[self.index]];
-    }
-    
     SCPictureItem *item = self.items[self.index];
     if (item.originImage) {
         [self.sheet showInView:self.view];
@@ -310,6 +300,8 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
 - (void)image:(UIImage *)image didFinishSavingWithError:(NSError *)error contextInfo:(void *)contextInfo {
     if (!error) {
         [SCToastView showInView:self.view text:@"保存成功"];
+    } else {
+        [SCToastView showInView:self.view text:@"保存失败"];
     }
 }
 

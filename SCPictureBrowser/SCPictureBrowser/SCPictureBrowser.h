@@ -41,9 +41,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @optional
 
-- (void)pictureBrowser:(SCPictureBrowser *)browser singleTapWithItem:(SCPictureItem *)item;
-- (void)pictureBrowser:(SCPictureBrowser *)browser doubleTapWithItem:(SCPictureItem *)item;
-- (void)pictureBrowser:(SCPictureBrowser *)browser longPressWithItem:(SCPictureItem *)item;
 - (void)pictureBrowser:(SCPictureBrowser *)browser didChangePageAtIndex:(NSInteger)index;
 
 @end

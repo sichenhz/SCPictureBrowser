@@ -185,14 +185,14 @@ static CGFloat const SCMinMaximumZoomScale = 2;
 #pragma mark - GestureRecognizer
 
 - (void)singleTapHandler:(UITapGestureRecognizer *)singleTap {
-    if ([self.delegate respondsToSelector:@selector(pictureCellSingleTap:)]) {
-        [self.delegate pictureCellSingleTap:self];
-    }
-    
     if (_scrollView.zoomScale > _scrollView.minimumZoomScale) {
         [_scrollView setZoomScale:_scrollView.minimumZoomScale animated:YES];
     } else if (_indicatorView.isAnimating) {
         [_indicatorView stopAnimating];
+    }
+    
+    if ([self.delegate respondsToSelector:@selector(pictureCellSingleTap:)]) {
+        [self.delegate pictureCellSingleTap:self];
     }
 }
 
