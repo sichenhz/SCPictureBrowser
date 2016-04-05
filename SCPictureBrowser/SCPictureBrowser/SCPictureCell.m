@@ -7,8 +7,10 @@
 //
 
 #import "SCPictureCell.h"
+#import "SCPictureItem.h"
 #import "SDWebImageManager.h"
 #import "SCActivityIndicatorView.h"
+#import "SCToastView.h"
 
 CGFloat const SCPictureCellRightMargin = 20;
 static CGFloat const SCMinMaximumZoomScale = 2;
@@ -93,18 +95,18 @@ static CGFloat const SCMinMaximumZoomScale = 2;
 
 #pragma mark - Public Method
 
-- (void)configureCellWithURL:(NSURL *)url sourceView:(UIView *)sourceView {
-    
-    _url = url;
+- (void)showImageWithItem:(SCPictureItem *)item {
+
+    _url = item.url;
     
     // 尝试从缓存里取图片
-    [[SDWebImageManager sharedManager].imageCache queryDiskCacheForKey:url.absoluteString done:^(UIImage *image, SDImageCacheType cacheType) {
+    [[SDWebImageManager sharedManager].imageCache queryDiskCacheForKey:item.url.absoluteString done:^(UIImage *image, SDImageCacheType cacheType) {
         // 如果没有取到图片
         if (!image) {
             // 设置缩略图
-            if (sourceView) {
-                self.imageView.image = [self thumbnailImage:sourceView];
-                self.imageView.frame = CGRectMake(0, 0, sourceView.frame.size.width, sourceView.frame.size.height);
+            if (item.sourceView) {
+                self.imageView.image = [self thumbnailImage:item.sourceView];
+                self.imageView.frame = CGRectMake(0, 0, item.sourceView.frame.size.width, item.sourceView.frame.size.height);
                 self.imageView.center = [UIApplication sharedApplication].keyWindow.center;
             }
             
@@ -112,7 +114,7 @@ static CGFloat const SCMinMaximumZoomScale = 2;
             [_indicatorView startAnimating];
             
             // 下载图片
-            [[SDWebImageManager sharedManager] downloadImageWithURL:url options:SDWebImageLowPriority | SDWebImageRetryFailed progress:nil completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+            [[SDWebImageManager sharedManager] downloadImageWithURL:item.url options:SDWebImageLowPriority | SDWebImageRetryFailed progress:nil completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
                 
                 if ([imageURL isEqual:_url]) {
                     // 结束loading
@@ -121,9 +123,10 @@ static CGFloat const SCMinMaximumZoomScale = 2;
                     // 成功下载图片
                     if (image) {
                         self.enableDoubleTap = YES;
+                        item.originImage = image;
                         self.imageView.image = image;
                         
-                        if (sourceView) {
+                        if (item.sourceView) {
                             [UIView animateWithDuration:0.4 animations:^{
                                 self.imageView.frame = [self imageViewRectWithImageSize:image.size];
                             } completion:^(BOOL finished) {
@@ -133,6 +136,10 @@ static CGFloat const SCMinMaximumZoomScale = 2;
                             self.imageView.frame = [self imageViewRectWithImageSize:image.size];
                             [self setMaximumZoomScale];
                         }
+                    }
+                    // 下载图片失败
+                    else if (error) {
+                        [SCToastView showInView:_scrollView text:@"下载失败"];
                     }
                 }
             }];

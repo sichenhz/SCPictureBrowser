@@ -7,18 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "SCPictureItem.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @protocol SCPictureBrowserDelegate;
-
-@interface SCPictureItem : NSObject
-
-@property (nullable, nonatomic, strong) NSURL *url;
-@property (nullable, nonatomic, strong) UIImage *originImage;
-@property (nullable, nonatomic, strong) UIView *sourceView;
-
-@end
 
 @interface SCPictureBrowser : UIViewController
 

@@ -1,0 +1,92 @@
+//
+//  SCToastView.m
+//  SCPictureBrowser
+//
+//  Created by sichenwang on 16/4/5.
+//  Copyright © 2016年 sichenwang. All rights reserved.
+//
+
+#import "SCToastView.h"
+
+@interface SCToastView()
+
+@property (nonatomic, strong) UIView *backgroundView;
+@property (nonatomic, strong) UILabel *contentLabel;
+
+@end
+
+@implementation SCToastView
+
++ (id)sharedManager {
+    static dispatch_once_t once;
+    static id instance;
+    dispatch_once(&once, ^{
+        instance = [self new];
+    });
+    return instance;
+}
+
+- (instancetype)initWithFrame:(CGRect)frame {
+    if (self = [super initWithFrame:frame]) {
+        self.layer.cornerRadius = 10;
+        self.layer.masksToBounds = YES;
+        self.alpha = 0;
+
+        _backgroundView = [[UIView alloc] init];
+        _backgroundView.backgroundColor = [UIColor blackColor];
+        _backgroundView.alpha = .65;
+        [self addSubview:_backgroundView];
+        
+        _contentLabel = [[UILabel alloc] init];
+        _contentLabel.font = [UIFont systemFontOfSize:14.0f];
+        _contentLabel.numberOfLines = 0;
+        _contentLabel.textColor = [UIColor whiteColor];
+        _contentLabel.backgroundColor = [UIColor clearColor];
+        _contentLabel.textAlignment = NSTextAlignmentCenter;
+        [self addSubview:_contentLabel];
+    }
+    return self;
+}
+
++ (void)showInView:(UIView *)view text:(NSString *)text {
+
+    SCToastView *toastView = [SCToastView sharedManager];
+    toastView.contentLabel.text = text;
+    
+    // layout
+    toastView.center = view.center;
+    CGSize size = [text boundingRectWithSize:CGSizeMake(240, 320)
+                                     options:NSStringDrawingTruncatesLastVisibleLine |
+                   NSStringDrawingUsesLineFragmentOrigin |
+                   NSStringDrawingUsesFontLeading
+                                  attributes:@{NSFontAttributeName:[UIFont systemFontOfSize:14.0f]}
+                                     context:nil].size;
+    toastView.contentLabel.frame = CGRectMake(0, 0, size.width, size.height);
+    toastView.bounds = CGRectMake(0, 0, size.width + 30, size.height + 15);
+    toastView.backgroundView.frame = toastView.bounds;
+    toastView.contentLabel.center = CGPointMake(CGRectGetMidX(toastView.bounds), CGRectGetMidY(toastView.bounds));
+
+    if (toastView.superview) {
+        [toastView removeFromSuperview];
+    }
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.01 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [view addSubview:toastView];
+        [UIView animateWithDuration:0.3
+                         animations:^{
+                             toastView.alpha = 1;
+                         }
+                         completion:^(BOOL finished) {
+                             [UIView animateWithDuration:0.3
+                                                   delay:1.5
+                                                 options:0
+                                              animations:^{
+                                                  toastView.alpha = 0;
+                                              }
+                                              completion:^(BOOL finished) {
+                                                  [toastView removeFromSuperview];
+                                              }];
+                         }];
+    });
+}
+
+@end

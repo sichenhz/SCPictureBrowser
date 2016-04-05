@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+@class SCPictureItem;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -20,7 +21,7 @@ extern CGFloat const SCPictureCellRightMargin;
 @property (nonatomic, weak) id<SCPictureDelegate> delegate;
 @property (nonatomic) BOOL enableDoubleTap;
 
-- (void)configureCellWithURL:(nonnull NSURL *)url sourceView:(nonnull UIView *)sourceView;
+- (void)showImageWithItem:(SCPictureItem *)item;
 - (CGRect)imageViewRectWithImageSize:(CGSize)imageSize;
 - (void)setMaximumZoomScale;
 
