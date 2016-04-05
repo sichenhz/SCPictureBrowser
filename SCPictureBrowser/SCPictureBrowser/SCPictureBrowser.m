@@ -17,7 +17,7 @@
 
 static NSString * const reuseIdentifier = @"SCPictureCell";
 
-@interface SCPictureBrowser()<UICollectionViewDataSource, UICollectionViewDelegate, SCPictureDelegate, UIScrollViewDelegate>
+@interface SCPictureBrowser()<UICollectionViewDataSource, UICollectionViewDelegate, SCPictureDelegate, UIScrollViewDelegate, UIActionSheetDelegate>
 
 @property (nonatomic, getter=isFirstShow) BOOL firstShow;
 @property (nonatomic, getter=isStatusBarHidden) BOOL statusBarHidden;
@@ -27,6 +27,7 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
 
 @implementation SCPictureBrowser
 {
+    UIActionSheet *_sheet;
     UICollectionView *_collectionView;
     UIPageControl *_pageControl;
     BOOL _isFromShowAction;
@@ -287,6 +288,84 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
     if ([self.delegate respondsToSelector:@selector(pictureBrowser:longPressWithItem:)]) {
         [self.delegate pictureBrowser:self longPressWithItem:self.items[self.index]];
     }
+    
+    SCPictureItem *item = self.items[self.index];
+    if (item.originImage) {
+        [self.sheet showInView:self.view];
+    }
 }
 
+// save picture
+- (UIActionSheet *)sheet {
+    if (!_sheet) {
+        _sheet = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"保存图片", nil];
+    }
+    return _sheet;
+}
+
+- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
+    if (buttonIndex == 0) {
+        SCPictureItem *item = self.items[self.index];
+        UIImageWriteToSavedPhotosAlbum(item.originImage, self, @selector(image:didFinishSavingWithError:contextInfo:), nil);
+    }
+}
+
+- (void)image:(UIImage *)image didFinishSavingWithError:(NSError *)error contextInfo:(void *)contextInfo {
+    if (!error) {
+        [self showToastWithText:@"保存成功"];
+    }
+}
+
+- (void)showToastWithText:(NSString *)text {
+    NSString *content = text;
+    
+    UIView *toastView = [[UIView alloc] init];
+    toastView.layer.cornerRadius = 10;
+    toastView.layer.masksToBounds = YES;
+    toastView.alpha = 0;
+    toastView.center = self.view.center;
+    [self.view addSubview:toastView];
+    
+    UIView *background = [[UIView alloc] init];
+    background.backgroundColor = [UIColor blackColor];
+    background.alpha = .65;
+    [toastView addSubview:background];
+    
+    UILabel *textLabel = [[UILabel alloc] init];
+    textLabel.font = [UIFont systemFontOfSize:14.0f];
+    textLabel.numberOfLines = 0;
+    textLabel.textColor = [UIColor whiteColor];
+    textLabel.backgroundColor = [UIColor clearColor];
+    textLabel.textAlignment = NSTextAlignmentCenter;
+    textLabel.text = content;
+    [toastView addSubview:textLabel];
+    
+    // layout
+    CGSize size = [content boundingRectWithSize:CGSizeMake(240, 320)
+                                        options:NSStringDrawingTruncatesLastVisibleLine |
+                   NSStringDrawingUsesLineFragmentOrigin |
+                   NSStringDrawingUsesFontLeading
+                                     attributes:@{NSFontAttributeName:[UIFont systemFontOfSize:14.0f]}
+                                        context:nil].size;
+    textLabel.frame = CGRectMake(0, 0, size.width, size.height);
+    toastView.bounds = CGRectMake(0, 0, size.width + 30, size.height + 15);
+    background.frame = toastView.bounds;
+    textLabel.center = CGPointMake(CGRectGetMidX(toastView.bounds), CGRectGetMidY(toastView.bounds));
+    
+    [UIView animateWithDuration:1.3
+                     animations:^{
+                         toastView.alpha = 1;
+                     }
+                     completion:^(BOOL finished) {
+                         [UIView animateWithDuration:1.3
+                                               delay:0
+                                             options:0
+                                          animations:^{
+                                              toastView.alpha = 0;
+                                          }
+                                          completion:^(BOOL finished) {
+                                              [toastView removeFromSuperview];
+                                          }];
+                     }];
+}
 @end

@@ -72,7 +72,7 @@
         item.url = [NSURL URLWithString:url];
         
         // 如果sourceView为nil，则以其他动画开启和关闭
-//        item.sourceView = imageView;
+        item.sourceView = imageView;
         [_items addObject:item];
     }
 }
