@@ -8,8 +8,12 @@
 
 #import <UIKit/UIKit.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface SCToastView : UIView
 
-+ (void)showInView:(UIView *)view text:(NSString *)text;
++ (void)showInView:(nonnull UIView *)view text:(nonnull NSString *)text;
 
 @end
+
+NS_ASSUME_NONNULL_END

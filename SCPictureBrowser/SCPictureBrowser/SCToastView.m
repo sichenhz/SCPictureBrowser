@@ -44,6 +44,10 @@ static void *toastKey = &toastKey;
 
 + (void)showInView:(UIView *)view text:(NSString *)text {
     
+    if (!view || !text) {
+        return;
+    }
+
     SCToastView *toastView = objc_getAssociatedObject(view, toastKey);
     if (!toastView) {
         toastView = [[SCToastView alloc] init];
