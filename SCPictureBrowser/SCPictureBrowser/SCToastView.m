@@ -7,6 +7,9 @@
 //
 
 #import "SCToastView.h"
+#import <objc/runtime.h>
+
+static void *toastKey = &toastKey;
 
 @interface SCToastView()
 
@@ -16,15 +19,6 @@
 @end
 
 @implementation SCToastView
-
-+ (id)sharedManager {
-    static dispatch_once_t once;
-    static id instance;
-    dispatch_once(&once, ^{
-        instance = [self new];
-    });
-    return instance;
-}
 
 - (instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
@@ -49,8 +43,12 @@
 }
 
 + (void)showInView:(UIView *)view text:(NSString *)text {
-
-    SCToastView *toastView = [SCToastView sharedManager];
+    
+    SCToastView *toastView = objc_getAssociatedObject(view, toastKey);
+    if (!toastView) {
+        toastView = [[SCToastView alloc] init];
+        objc_setAssociatedObject(view, toastKey, toastView, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    }
     toastView.contentLabel.text = text;
     
     // layout
