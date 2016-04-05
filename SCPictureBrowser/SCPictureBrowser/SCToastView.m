@@ -56,7 +56,6 @@ static void *toastKey = &toastKey;
     toastView.contentLabel.text = text;
     
     // layout
-    toastView.center = view.center;
     CGSize size = [text boundingRectWithSize:CGSizeMake(240, 320)
                                      options:NSStringDrawingTruncatesLastVisibleLine |
                    NSStringDrawingUsesLineFragmentOrigin |
@@ -65,6 +64,7 @@ static void *toastKey = &toastKey;
                                      context:nil].size;
     toastView.contentLabel.frame = CGRectMake(0, 0, size.width, size.height);
     toastView.bounds = CGRectMake(0, 0, size.width + 30, size.height + 15);
+    toastView.center = CGPointMake(view.frame.size.width / 2, view.frame.size.height / 2);
     toastView.backgroundView.frame = toastView.bounds;
     toastView.contentLabel.center = CGPointMake(CGRectGetMidX(toastView.bounds), CGRectGetMidY(toastView.bounds));
 
