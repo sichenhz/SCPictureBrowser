@@ -42,9 +42,6 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
     
     [self initializeCollectionView];
     [self initializePageControl];
-
-    self.statusBarHidden = [UIApplication sharedApplication].isStatusBarHidden;
-    [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationNone];
     
     self.firstShow = YES;
     self.browsing = YES;
@@ -95,7 +92,10 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
     _isFromShowAction = YES;
     UIWindow *window = [UIApplication sharedApplication].keyWindow;
     [window addSubview:self.view];
-    [window.rootViewController addChildViewController:self];    
+    [window.rootViewController addChildViewController:self];
+    
+    self.statusBarHidden = [UIApplication sharedApplication].isStatusBarHidden;
+    [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationNone];
 }
 
 #pragma mark - Setter
