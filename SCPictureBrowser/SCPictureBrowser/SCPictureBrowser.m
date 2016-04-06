@@ -49,6 +49,8 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
 }
 
 - (void)initializeCollectionView {
+    self.automaticallyAdjustsScrollViewInsets = NO;
+
     CGRect frame = self.view.frame;
     frame.size.width += SCPictureCellRightMargin;
     
