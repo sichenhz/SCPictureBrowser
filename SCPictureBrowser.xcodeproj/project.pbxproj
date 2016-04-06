@@ -30,6 +30,7 @@
 		255230891C9FF2AD009F3091 /* UIImageView+WebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 2552307A1C9FF2AD009F3091 /* UIImageView+WebCache.m */; };
 		2552308A1C9FF2AD009F3091 /* UIView+WebCacheOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 2552307C1C9FF2AD009F3091 /* UIView+WebCacheOperation.m */; };
 		2552308D1C9FFCDB009F3091 /* SCPictureCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2552308C1C9FFCDB009F3091 /* SCPictureCell.m */; };
+		25539A051CB509C700F55874 /* SCAlertView.m in Sources */ = {isa = PBXBuildFile; fileRef = 25539A041CB509C700F55874 /* SCAlertView.m */; };
 		25D7B93C1CB35F1700903E61 /* SCToastView.m in Sources */ = {isa = PBXBuildFile; fileRef = 25D7B93B1CB35F1700903E61 /* SCToastView.m */; };
 		25D7B9421CB364B400903E61 /* SCPictureItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 25D7B9411CB364B400903E61 /* SCPictureItem.m */; };
 		25E2809F1CA3D6560052E818 /* SCPictureBrowser.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 25E2809E1CA3D6560052E818 /* SCPictureBrowser.bundle */; };
@@ -81,6 +82,8 @@
 		2552307C1C9FF2AD009F3091 /* UIView+WebCacheOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+WebCacheOperation.m"; sourceTree = "<group>"; };
 		2552308B1C9FFCDB009F3091 /* SCPictureCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SCPictureCell.h; path = SCPictureBrowser/SCPictureBrowser/SCPictureCell.h; sourceTree = SOURCE_ROOT; };
 		2552308C1C9FFCDB009F3091 /* SCPictureCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SCPictureCell.m; path = SCPictureBrowser/SCPictureBrowser/SCPictureCell.m; sourceTree = SOURCE_ROOT; };
+		25539A031CB509C700F55874 /* SCAlertView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SCAlertView.h; sourceTree = "<group>"; };
+		25539A041CB509C700F55874 /* SCAlertView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SCAlertView.m; sourceTree = "<group>"; };
 		25D7B93A1CB35F1700903E61 /* SCToastView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SCToastView.h; sourceTree = "<group>"; };
 		25D7B93B1CB35F1700903E61 /* SCToastView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SCToastView.m; sourceTree = "<group>"; };
 		25D7B9401CB364B400903E61 /* SCPictureItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SCPictureItem.h; sourceTree = "<group>"; };
@@ -155,6 +158,8 @@
 				251A74011CA2452300FEC45E /* SCActivityIndicatorView.m */,
 				25D7B93A1CB35F1700903E61 /* SCToastView.h */,
 				25D7B93B1CB35F1700903E61 /* SCToastView.m */,
+				25539A031CB509C700F55874 /* SCAlertView.h */,
+				25539A041CB509C700F55874 /* SCAlertView.m */,
 			);
 			path = SCPictureBrowser;
 			sourceTree = "<group>";
@@ -280,6 +285,7 @@
 				25D7B9421CB364B400903E61 /* SCPictureItem.m in Sources */,
 				2552305D1C9FE09D009F3091 /* SCPictureBrowser.m in Sources */,
 				2552307F1C9FF2AD009F3091 /* SDWebImageCompat.m in Sources */,
+				25539A051CB509C700F55874 /* SCAlertView.m in Sources */,
 				2552308A1C9FF2AD009F3091 /* UIView+WebCacheOperation.m in Sources */,
 				25D7B93C1CB35F1700903E61 /* SCToastView.m in Sources */,
 				255230861C9FF2AD009F3091 /* UIImage+GIF.m in Sources */,

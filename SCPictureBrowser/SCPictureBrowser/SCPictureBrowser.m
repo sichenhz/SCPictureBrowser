@@ -11,6 +11,7 @@
 #import "SDWebImageManager.h"
 #import "SDWebImagePrefetcher.h"
 #import "SCToastView.h"
+#import "SCAlertView.h"
 
 static NSString * const reuseIdentifier = @"SCPictureCell";
 
@@ -282,25 +283,16 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
 - (void)pictureCellLongPress:(SCPictureCell *)pictureCell {
     SCPictureItem *item = self.items[self.index];
     if (item.originImage) {
-        [self.sheet showInView:self.view];
+        SCAlertView *alertView = [SCAlertView alertViewWithTitle:nil message:nil style:SCAlertViewStyleActionSheet];
+        [alertView addAction:[SCAlertAction actionWithTitle:@"保存图片" style:SCAlertActionStyleDefault handler:^(SCAlertAction * _Nonnull action) {
+            UIImageWriteToSavedPhotosAlbum(item.originImage, self, @selector(image:didFinishSavingWithError:contextInfo:), nil);
+        }]];
+        [alertView addAction:[SCAlertAction actionWithTitle:@"取消" style:SCAlertActionStyleCancel handler:nil]];
+        [alertView show];
     }
 }
 
 // save picture
-- (UIActionSheet *)sheet {
-    if (!_sheet) {
-        _sheet = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"保存图片", nil];
-    }
-    return _sheet;
-}
-
-- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
-    if (buttonIndex == 0) {
-        SCPictureItem *item = self.items[self.index];
-        UIImageWriteToSavedPhotosAlbum(item.originImage, self, @selector(image:didFinishSavingWithError:contextInfo:), nil);
-    }
-}
-
 - (void)image:(UIImage *)image didFinishSavingWithError:(NSError *)error contextInfo:(void *)contextInfo {
     if (!error) {
         [SCToastView showInView:self.view text:@"保存成功"];

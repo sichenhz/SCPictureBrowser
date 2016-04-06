@@ -223,8 +223,10 @@ static CGFloat const SCMinMaximumZoomScale = 2;
 }
 
 - (void)longPressHandler:(UILongPressGestureRecognizer *)longPress {
-    if ([self.delegate respondsToSelector:@selector(pictureCellLongPress:)]) {
-        [self.delegate pictureCellLongPress:self];
+    if (longPress.state == UIGestureRecognizerStateBegan) {
+        if ([self.delegate respondsToSelector:@selector(pictureCellLongPress:)]) {
+            [self.delegate pictureCellLongPress:self];
+        }
     }
 }
 
