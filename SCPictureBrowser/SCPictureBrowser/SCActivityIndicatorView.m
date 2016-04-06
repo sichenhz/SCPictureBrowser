@@ -16,6 +16,7 @@
 
 - (instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:CGRectMake(frame.origin.x, frame.origin.y, 30, 30)]) {
+        self.userInteractionEnabled = NO;
         _imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, self.frame.size.width, self.frame.size.height)];
         _imageView.image = [UIImage imageNamed:@"SCPictureBrowser.bundle/loading_circle"];
         [self addSubview:_imageView];
