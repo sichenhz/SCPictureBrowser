@@ -18,8 +18,11 @@ extern CGFloat const SCPictureCellRightMargin;
 @interface SCPictureCell : UICollectionViewCell
 
 @property (nonatomic, strong, readonly, nonnull) UIImageView *imageView;
+@property (nonatomic, strong, readonly, nonnull) UIScrollView *scrollView;
+
 @property (nonatomic, weak) id<SCPictureDelegate> delegate;
 @property (nonatomic) BOOL enableDoubleTap;
+@property (nonatomic) BOOL enableDynamicsDismiss;
 
 - (void)showImageWithItem:(SCPictureItem *)item;
 - (CGRect)imageViewRectWithImageSize:(CGSize)imageSize;
@@ -29,9 +32,10 @@ extern CGFloat const SCPictureCellRightMargin;
 
 @protocol SCPictureDelegate <NSObject>
 
-- (void)pictureCellSingleTap:(SCPictureCell *)pictureCell;
-- (void)pictureCellDoubleTap:(SCPictureCell *)pictureCell;
-- (void)pictureCellLongPress:(SCPictureCell *)pictureCell;
+- (void)pictureCell:(SCPictureCell *)pictureCell singleTap:(UITapGestureRecognizer *)singleTap;
+- (void)pictureCell:(SCPictureCell *)pictureCell doubleTap:(UITapGestureRecognizer *)doubleTap;
+- (void)pictureCell:(SCPictureCell *)pictureCell longPress:(UILongPressGestureRecognizer *)longPress;
+- (void)pictureCell:(SCPictureCell *)pictureCell pan:(UIPanGestureRecognizer *)pan;
 
 @end
 

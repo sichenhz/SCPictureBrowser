@@ -14,12 +14,21 @@
 #import "SCAlertView.h"
 
 static NSString * const reuseIdentifier = @"SCPictureCell";
+static CGFloat const kDismissalVelocity = 800.0;
 
 @interface SCPictureBrowser()<UICollectionViewDataSource, UICollectionViewDelegate, SCPictureDelegate, UIScrollViewDelegate, UIActionSheetDelegate>
 
 @property (nonatomic, getter=isFirstShow) BOOL firstShow;
 @property (nonatomic, getter=isStatusBarHidden) BOOL statusBarHidden;
 @property (nonatomic, getter=isBrowsing) BOOL browsing;
+
+// UIDynamics
+@property (nonatomic, strong) UIDynamicAnimator *animator;
+@property (nonatomic, strong) UIAttachmentBehavior *attachmentBehavior;
+@property (nonatomic, assign) CGPoint imageDragStartingPoint;
+@property (nonatomic, assign) UIOffset imageDragOffsetFromActualTranslation;
+@property (nonatomic, assign) UIOffset imageDragOffsetFromImageCenter;
+@property (nonatomic, assign) BOOL isDraggingImage;
 
 @end
 
@@ -230,6 +239,7 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     SCPictureCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:reuseIdentifier forIndexPath:indexPath];
+    cell.enableDynamicsDismiss = self.items.count == 1 ? YES : NO;
     cell.delegate = self;
     
     SCPictureItem *item = self.items[indexPath.item];
@@ -258,7 +268,7 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
 
 #pragma mark - SCPictureCellDelegate
 
-- (void)pictureCellSingleTap:(SCPictureCell *)pictureCell {
+- (void)pictureCell:(SCPictureCell *)pictureCell singleTap:(UITapGestureRecognizer *)singleTap {
     if (_isFromShowAction) {
         [[UIApplication sharedApplication] setStatusBarHidden:self.isStatusBarHidden withAnimation:UIStatusBarAnimationNone];
         [self setPageControlHidden:YES];
@@ -278,11 +288,11 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
     }
 }
 
-- (void)pictureCellDoubleTap:(SCPictureCell *)pictureCell {
+- (void)pictureCell:(SCPictureCell *)pictureCell doubleTap:(UITapGestureRecognizer *)doubleTap {
     
 }
 
-- (void)pictureCellLongPress:(SCPictureCell *)pictureCell {
+- (void)pictureCell:(SCPictureCell *)pictureCell longPress:(UILongPressGestureRecognizer *)longPress {
     SCPictureItem *item = self.items[self.index];
     if (item.originImage) {
         SCAlertView *alertView = [SCAlertView alertViewWithTitle:nil message:nil style:SCAlertViewStyleActionSheet];
@@ -293,6 +303,147 @@ static NSString * const reuseIdentifier = @"SCPictureCell";
         [alertView show];
     }
 }
+
+- (void)pictureCell:(SCPictureCell *)pictureCell pan:(UIPanGestureRecognizer *)pan {
+    
+    CGPoint translation = [pan translationInView:pan.view];
+    CGPoint locationInView = [pan locationInView:pan.view];
+    CGPoint velocity = [pan velocityInView:pan.view];
+    CGFloat vectorDistance = sqrtf(powf(velocity.x, 2)+powf(velocity.y, 2));
+
+    if (pan.state == UIGestureRecognizerStateBegan) {
+        self.isDraggingImage = CGRectContainsPoint(pictureCell.imageView.frame, locationInView);
+        if (self.isDraggingImage) {
+            [self startImageDragging:locationInView translationOffset:UIOffsetZero pictureCell:pictureCell];
+        }
+    }
+    else if (pan.state == UIGestureRecognizerStateChanged) {
+        if (self.isDraggingImage) {
+            CGPoint newAnchor = self.imageDragStartingPoint;
+            newAnchor.x += translation.x + self.imageDragOffsetFromActualTranslation.horizontal;
+            newAnchor.y += translation.y + self.imageDragOffsetFromActualTranslation.vertical;
+            self.attachmentBehavior.anchorPoint = newAnchor;
+        }
+        else {
+            self.isDraggingImage = CGRectContainsPoint(pictureCell.imageView.frame, locationInView);
+            if (self.isDraggingImage) {
+                UIOffset translationOffset = UIOffsetMake(-1*translation.x, -1*translation.y);
+                [self startImageDragging:locationInView translationOffset:translationOffset pictureCell:pictureCell];
+            }
+        }
+    }
+    else {
+        if (vectorDistance > kDismissalVelocity) {
+            if (self.isDraggingImage) {
+                [self dismissImageWithFlick:velocity pictureCell:pictureCell];
+            }
+        } else {
+            [self cancelCurrentImageDrag:YES pictureCell:pictureCell];
+        }
+    }
+}
+
+- (void)cancelCurrentImageDrag:(BOOL)animated pictureCell:(SCPictureCell *)pictureCell {
+    [self.animator removeAllBehaviors];
+    self.attachmentBehavior = nil;
+    self.isDraggingImage = NO;
+    if (animated == NO) {
+        pictureCell.imageView.transform = CGAffineTransformIdentity;
+        pictureCell.imageView.center = CGPointMake(pictureCell.scrollView.contentSize.width/2.0f, pictureCell.scrollView.contentSize.height/2.0f);
+    } else {
+        [UIView
+         animateWithDuration:0.7
+         delay:0
+         usingSpringWithDamping:0.7
+         initialSpringVelocity:0
+         options:UIViewAnimationOptionAllowUserInteraction |
+         UIViewAnimationOptionBeginFromCurrentState
+         animations:^{
+             if (self.isDraggingImage == NO) {
+                 pictureCell.imageView.transform = CGAffineTransformIdentity;
+                 if (pictureCell.scrollView.dragging == NO && pictureCell.scrollView.decelerating == NO) {
+                     pictureCell.imageView.center = CGPointMake(CGRectGetMidX(pictureCell.scrollView.frame), CGRectGetMidY(pictureCell.scrollView.frame));
+                 }
+             }
+         } completion:nil];
+    }
+}
+
+- (void)dismiss {
+    [[UIApplication sharedApplication] setStatusBarHidden:self.isStatusBarHidden withAnimation:UIStatusBarAnimationNone];
+    [self setPageControlHidden:YES];
+    [UIView animateWithDuration:0.4 animations:^{
+        self.view.alpha = 0;
+    } completion:^(BOOL finished) {
+        self.browsing = NO;
+        [self.view removeFromSuperview];
+        [self removeFromParentViewController];
+    }];
+}
+
+- (void)dismissImageWithFlick:(CGPoint)velocity pictureCell:(SCPictureCell *)pictureCell {
+    __weak typeof(self)weakSelf = self;
+    UIPushBehavior *push = [[UIPushBehavior alloc] initWithItems:@[pictureCell.imageView] mode:UIPushBehaviorModeInstantaneous];
+    push.pushDirection = CGVectorMake(velocity.x*0.1, velocity.y*0.1);
+    [push setTargetOffsetFromCenter:self.imageDragOffsetFromImageCenter forItem:pictureCell.imageView];
+    push.action = ^{
+        if ([weakSelf imageViewIsOffscreen:pictureCell]) {
+            [weakSelf.animator removeAllBehaviors];
+            weakSelf.attachmentBehavior = nil;
+            [weakSelf dismiss];
+        }
+    };
+    [self.animator removeBehavior:self.attachmentBehavior];
+    [self.animator addBehavior:push];
+}
+
+- (void)startImageDragging:(CGPoint)locationInView translationOffset:(UIOffset)translationOffset pictureCell:(SCPictureCell *)pictureCell {
+    self.animator = [[UIDynamicAnimator alloc] initWithReferenceView:pictureCell.scrollView];
+    self.imageDragStartingPoint = locationInView;
+    self.imageDragOffsetFromActualTranslation = translationOffset;
+    CGPoint anchor = self.imageDragStartingPoint;
+    CGPoint imageCenter = pictureCell.imageView.center;
+    UIOffset offset = UIOffsetMake(locationInView.x-imageCenter.x, locationInView.y-imageCenter.y);
+    self.imageDragOffsetFromImageCenter = offset;
+    self.attachmentBehavior = [[UIAttachmentBehavior alloc] initWithItem:pictureCell.imageView offsetFromCenter:offset attachedToAnchor:anchor];
+    [self.animator addBehavior:self.attachmentBehavior];
+    UIDynamicItemBehavior *modifier = [[UIDynamicItemBehavior alloc] initWithItems:@[pictureCell.imageView]];
+    modifier.angularResistance = [self appropriateAngularResistanceForView:pictureCell.imageView];
+    modifier.density = [self appropriateDensityForView:pictureCell.imageView];
+    [self.animator addBehavior:modifier];
+}
+
+- (BOOL)imageViewIsOffscreen:(SCPictureCell *)pictureCell {
+    CGRect visibleRect = [pictureCell.scrollView convertRect:self.view.bounds fromView:self.view];
+    return ([self.animator itemsInRect:visibleRect].count == 0);
+}
+
+- (CGFloat)appropriateAngularResistanceForView:(UIView *)view {
+    CGFloat height = view.bounds.size.height;
+    CGFloat width = view.bounds.size.width;
+    CGFloat actualArea = height * width;
+    CGFloat referenceArea = self.view.bounds.size.width * self.view.bounds.size.height;
+    CGFloat factor = referenceArea / actualArea;
+    CGFloat defaultResistance = 4.0f; // Feels good with a 1x1 on 3.5 inch displays. We'll adjust this to match the current display.
+    CGFloat screenWidth = [UIScreen mainScreen].bounds.size.width;
+    CGFloat screenHeight = [UIScreen mainScreen].bounds.size.height;
+    CGFloat resistance = defaultResistance * ((320.0 * 480.0) / (screenWidth * screenHeight));
+    return resistance * factor;
+}
+
+- (CGFloat)appropriateDensityForView:(UIView *)view {
+    CGFloat height = view.bounds.size.height;
+    CGFloat width = view.bounds.size.width;
+    CGFloat actualArea = height * width;
+    CGFloat referenceArea = self.view.bounds.size.width * self.view.bounds.size.height;
+    CGFloat factor = referenceArea / actualArea;
+    CGFloat defaultDensity = 0.5f; // Feels good on 3.5 inch displays. We'll adjust this to match the current display.
+    CGFloat screenWidth = [UIScreen mainScreen].bounds.size.width;
+    CGFloat screenHeight = [UIScreen mainScreen].bounds.size.height;
+    CGFloat appropriateDensity = defaultDensity * ((320.0 * 480.0) / (screenWidth * screenHeight));
+    return appropriateDensity * factor;
+}
+
 
 // save picture
 - (void)image:(UIImage *)image didFinishSavingWithError:(NSError *)error contextInfo:(void *)contextInfo {

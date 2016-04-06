@@ -17,14 +17,13 @@ static CGFloat const SCMinMaximumZoomScale = 2;
 
 @interface SCPictureCell()<UIScrollViewDelegate>
 
+@property (nonatomic, strong) SCActivityIndicatorView *indicatorView;
+@property (nonatomic, strong) NSURL *url;
+@property (nonatomic, strong) UIPanGestureRecognizer *pan;
+
 @end
 
 @implementation SCPictureCell
-{
-    UIScrollView *_scrollView;
-    SCActivityIndicatorView *_indicatorView;
-    NSURL *_url;
-}
 
 - (instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
@@ -42,8 +41,8 @@ static CGFloat const SCMinMaximumZoomScale = 2;
     
     self.enableDoubleTap = NO;
     
-    if (_indicatorView.isAnimating) {
-        [_indicatorView stopAnimating];
+    if (self.indicatorView.isAnimating) {
+        [self.indicatorView stopAnimating];
     }
 }
 
@@ -51,23 +50,23 @@ static CGFloat const SCMinMaximumZoomScale = 2;
 
 - (void)initializeScrollViewWithFrame:(CGRect)frame {
     _scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width - SCPictureCellRightMargin, frame.size.height)];
-    _scrollView.showsHorizontalScrollIndicator = NO;
-    _scrollView.showsVerticalScrollIndicator = NO;
-    _scrollView.delegate = self;
-    [self addSubview:_scrollView];
+    self.scrollView.showsHorizontalScrollIndicator = NO;
+    self.scrollView.showsVerticalScrollIndicator = NO;
+    self.scrollView.delegate = self;
+    [self addSubview:self.scrollView];
 }
 
 - (void)initializeImageView {
     _imageView = [[UIImageView alloc] init];
-    _imageView.contentMode = UIViewContentModeScaleAspectFill;
-    _imageView.clipsToBounds = YES;
-    [_scrollView addSubview:_imageView];
+    self.imageView.contentMode = UIViewContentModeScaleAspectFill;
+    self.imageView.clipsToBounds = YES;
+    [self.scrollView addSubview:self.imageView];
 }
 
 - (void)initializeIndicatorView {
-    _indicatorView = [[SCActivityIndicatorView alloc] init];
-    _indicatorView.center = _scrollView.center;
-    [self addSubview:_indicatorView];
+    self.indicatorView = [[SCActivityIndicatorView alloc] init];
+    self.indicatorView.center = self.scrollView.center;
+    [self addSubview:self.indicatorView];
 }
 
 - (void)initializeGesture {
@@ -94,8 +93,8 @@ static CGFloat const SCMinMaximumZoomScale = 2;
 }
 
 - (void)showImage:(UIImage *)image {
-    if (_scrollView.zoomScale > 1) {
-        [_scrollView setZoomScale:1 animated:NO];
+    if (self.scrollView.zoomScale > 1) {
+        [self.scrollView setZoomScale:1 animated:NO];
     }
     
     self.enableDoubleTap = YES;
@@ -104,11 +103,30 @@ static CGFloat const SCMinMaximumZoomScale = 2;
     [self setMaximumZoomScale];
 }
 
+- (UIPanGestureRecognizer *)pan {
+    if (!_pan) {
+        _pan = [[UIPanGestureRecognizer alloc] init];
+        _pan.maximumNumberOfTouches = 1;
+        [_pan addTarget:self action:@selector(panHandler:)];
+    }
+    return _pan;
+}
+
 #pragma mark - Public Method
+
+- (void)setEnableDynamicsDismiss:(BOOL)enableDynamicsDismiss {
+    _enableDynamicsDismiss = enableDynamicsDismiss;
+    if (enableDynamicsDismiss) {
+        [self.scrollView addGestureRecognizer:self.pan];
+    } else {
+        NSLog(@"%@", _pan);
+        [self.scrollView removeGestureRecognizer:_pan];
+    }
+}
 
 - (void)showImageWithItem:(SCPictureItem *)item {
     
-    _url = item.url;
+    self.url = item.url;
     
     if (item.originImage) {
         [self showImage:item.originImage];
@@ -126,14 +144,14 @@ static CGFloat const SCMinMaximumZoomScale = 2;
                 }
                 
                 // loading
-                [_indicatorView startAnimating];
+                [self.indicatorView startAnimating];
                 
                 // 下载图片
                 [[SDWebImageManager sharedManager] downloadImageWithURL:item.url options:SDWebImageLowPriority | SDWebImageRetryFailed progress:nil completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
                     
-                    if ([imageURL isEqual:_url]) {
+                    if ([imageURL isEqual:self.url]) {
                         // 结束loading
-                        [_indicatorView stopAnimating];
+                        [self.indicatorView stopAnimating];
                         
                         // 成功下载图片
                         if (image) {
@@ -154,7 +172,7 @@ static CGFloat const SCMinMaximumZoomScale = 2;
                         }
                         // 下载图片失败
                         else if (error) {
-                            [SCToastView showInView:_scrollView text:@"下载失败"];
+                            [SCToastView showInView:self.scrollView text:@"下载失败"];
                         }
                     }
                 }];
@@ -185,48 +203,54 @@ static CGFloat const SCMinMaximumZoomScale = 2;
 }
 
 - (void)setMaximumZoomScale {
-    if (_scrollView.frame.size.height > self.imageView.frame.size.height * SCMinMaximumZoomScale) {
-        _scrollView.maximumZoomScale = self.frame.size.height / self.imageView.frame.size.height;
+    if (self.scrollView.frame.size.height > self.imageView.frame.size.height * SCMinMaximumZoomScale) {
+        self.scrollView.maximumZoomScale = self.frame.size.height / self.imageView.frame.size.height;
     } else {
-        _scrollView.maximumZoomScale = SCMinMaximumZoomScale;
+        self.scrollView.maximumZoomScale = SCMinMaximumZoomScale;
     }
 }
 
 #pragma mark - GestureRecognizer
 
 - (void)singleTapHandler:(UITapGestureRecognizer *)singleTap {
-    if (_scrollView.zoomScale > _scrollView.minimumZoomScale) {
-        [_scrollView setZoomScale:_scrollView.minimumZoomScale animated:YES];
-    } else if (_indicatorView.isAnimating) {
-        [_indicatorView stopAnimating];
+    if (self.scrollView.zoomScale > self.scrollView.minimumZoomScale) {
+        [self.scrollView setZoomScale:self.scrollView.minimumZoomScale animated:YES];
+    } else if (self.indicatorView.isAnimating) {
+        [self.indicatorView stopAnimating];
     }
     
-    if ([self.delegate respondsToSelector:@selector(pictureCellSingleTap:)]) {
-        [self.delegate pictureCellSingleTap:self];
+    if ([self.delegate respondsToSelector:@selector(pictureCell:singleTap:)]) {
+        [self.delegate pictureCell:self singleTap:singleTap];
     }
 }
 
 - (void)doubleTapHandler:(UITapGestureRecognizer *)doubleTap {
-    if ([self.delegate respondsToSelector:@selector(pictureCellDoubleTap:)]) {
-        [self.delegate pictureCellDoubleTap:self];
+    if ([self.delegate respondsToSelector:@selector(pictureCell:doubleTap:)]) {
+        [self.delegate pictureCell:self doubleTap:doubleTap];
     }
     
     if (!self.enableDoubleTap) {
         return;
     }
-    if (_scrollView.zoomScale > _scrollView.minimumZoomScale) {
-        [_scrollView setZoomScale:_scrollView.minimumZoomScale animated:YES];
+    if (self.scrollView.zoomScale > self.scrollView.minimumZoomScale) {
+        [self.scrollView setZoomScale:self.scrollView.minimumZoomScale animated:YES];
     } else {
         CGPoint point = [doubleTap locationInView:doubleTap.view];
-        [_scrollView zoomToRect:CGRectMake(point.x, point.y, 1, 1) animated:YES];
+        [self.scrollView zoomToRect:CGRectMake(point.x, point.y, 1, 1) animated:YES];
     }
 }
 
 - (void)longPressHandler:(UILongPressGestureRecognizer *)longPress {
     if (longPress.state == UIGestureRecognizerStateBegan) {
-        if ([self.delegate respondsToSelector:@selector(pictureCellLongPress:)]) {
-            [self.delegate pictureCellLongPress:self];
+        if ([self.delegate respondsToSelector:@selector(pictureCell:longPress:)]) {
+            [self.delegate pictureCell:self longPress:longPress];
         }
+    }
+}
+
+- (void)panHandler:(UIPanGestureRecognizer *)pan {
+    if ([self.delegate respondsToSelector:@selector(pictureCell:pan:)]) {
+        [self.delegate pictureCell:self pan:pan];
     }
 }
 
@@ -237,6 +261,15 @@ static CGFloat const SCMinMaximumZoomScale = 2;
 }
 
 - (void)scrollViewDidZoom:(UIScrollView *)scrollView {
+    
+    if (self.enableDynamicsDismiss) {
+        if (scrollView.zoomScale > scrollView.minimumZoomScale) {
+            self.pan.enabled = NO;
+        } else {
+            self.pan.enabled = YES;
+        }
+    }
+    
     CGFloat offsetX = (scrollView.bounds.size.width > scrollView.contentSize.width) ?
     (scrollView.bounds.size.width - scrollView.contentSize.width) * 0.5 : 0.0;
     CGFloat offsetY = (scrollView.bounds.size.height > scrollView.contentSize.height) ?
