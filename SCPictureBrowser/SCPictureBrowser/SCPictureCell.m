@@ -64,7 +64,7 @@ static CGFloat const SCMinMaximumZoomScale = 2;
 }
 
 - (void)initializeIndicatorView {
-    self.indicatorView = [[SCActivityIndicatorView alloc] init];
+    self.indicatorView = [[SCActivityIndicatorView alloc] initWithStyle:SCActivityIndicatorViewStyleCircleLarge];
     self.indicatorView.center = self.scrollView.center;
     [self addSubview:self.indicatorView];
 }
@@ -119,7 +119,6 @@ static CGFloat const SCMinMaximumZoomScale = 2;
     if (enableDynamicsDismiss) {
         [self.scrollView addGestureRecognizer:self.pan];
     } else {
-        NSLog(@"%@", _pan);
         [self.scrollView removeGestureRecognizer:_pan];
     }
 }

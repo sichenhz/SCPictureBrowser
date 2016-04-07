@@ -8,26 +8,97 @@
 
 #import "SCActivityIndicatorView.h"
 
-@implementation SCActivityIndicatorView
-{
-    UIImageView *_imageView;
-    BOOL _isAnimating;
+@interface UIView(Extension)
+
+@property (nonatomic) CGSize size;
+
+@end
+
+@implementation UIView(Extension)
+
+- (CGSize)size {
+    return self.frame.size;
 }
 
-- (instancetype)initWithFrame:(CGRect)frame {
-    if (self = [super initWithFrame:CGRectMake(frame.origin.x, frame.origin.y, 30, 30)]) {
-        self.userInteractionEnabled = NO;
-        _imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, self.frame.size.width, self.frame.size.height)];
-        _imageView.image = [UIImage imageNamed:@"SCPictureBrowser.bundle/loading_circle"];
-        [self addSubview:_imageView];
-        
-        self.hidden = YES;
+- (void)setSize:(CGSize)size {
+    CGRect frame = self.frame;
+    frame.size = size;
+    self.frame = frame;
+}
+
+@end
+
+@interface SCActivityIndicatorView()
+
+@property (nonatomic, strong) UIImageView *imageView;
+@property (nonatomic, getter=isAnimating) BOOL animating;
+
+@end
+
+@implementation SCActivityIndicatorView
+
+- (instancetype)initWithStyle:(SCActivityIndicatorViewStyle)style {
+    if (self = [super initWithFrame:CGRectZero]) {
+        [self initializeSubviews];
+        self.style = style;
     }
     return self;
 }
 
+- (instancetype)initWithFrame:(CGRect)frame {
+    if (self = [super initWithFrame:frame]) {
+        [self initializeSubviews];
+        self.style = SCActivityIndicatorViewStyleDefault;
+    }
+    return self;
+}
+
+- (instancetype)initWithCoder:(NSCoder *)aDecoder {
+    if (self = [super initWithCoder:aDecoder]) {
+        [self initializeSubviews];
+    }
+    return self;
+}
+
+- (void)initializeSubviews {
+    self.hidden = YES;
+    self.userInteractionEnabled = NO;
+    self.backgroundColor = [UIColor clearColor];
+    self.imageView = [[UIImageView alloc] init];
+    self.imageView.contentMode = UIViewContentModeCenter;
+    [self addSubview:self.imageView];
+}
+
+- (void)setStyle:(SCActivityIndicatorViewStyle)style {
+    _style = style;
+    switch (style) {
+        case SCActivityIndicatorViewStyleDefault:
+            self.layer.cornerRadius = 5;
+            self.backgroundColor = [UIColor colorWithRed:241/255.0 green:241/255.0 blue:241/255.0 alpha:1];
+            self.imageView.image = [UIImage imageNamed:@"SCPictureBrowser.bundle/loading_circle"];
+            self.size = CGSizeMake(44, 44);
+            self.imageView.center = CGPointMake(CGRectGetMidX(self.frame), CGRectGetMidY(self.frame));
+            break;
+        case SCActivityIndicatorViewStyleCircle:
+            self.layer.cornerRadius = 0;
+            self.backgroundColor = [UIColor clearColor];
+            self.imageView.image = [UIImage imageNamed:@"SCPictureBrowser.bundle/loading_circle"];
+            self.size = self.imageView.size;
+            break;
+        case SCActivityIndicatorViewStyleCircleLarge:
+            self.layer.cornerRadius = 0;
+            self.backgroundColor = [UIColor clearColor];
+            self.imageView.image = [UIImage imageNamed:@"SCPictureBrowser.bundle/loading_circle_large"];
+            self.size = self.imageView.size;
+            break;
+    }
+}
+
+#pragma mark - Public Method
+
 - (void)startAnimating {
     self.hidden = NO;
+    self.animating = YES;
     CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"transform.rotation"];
     animation.fromValue = @(0);
     animation.toValue = @(M_PI * 2);
@@ -35,18 +106,13 @@
     animation.fillMode = kCAFillModeForwards;
     animation.removedOnCompletion = NO;
     animation.repeatCount = MAXFLOAT;
-    [_imageView.layer addAnimation:animation forKey:@"rotation"];
-    _isAnimating = YES;
+    [self.imageView.layer addAnimation:animation forKey:@"rotation"];
 }
 
 - (void)stopAnimating {
     self.hidden = YES;
-    _isAnimating = NO;
-    [_imageView.layer removeAnimationForKey:@"rotation"];
-}
-
-- (BOOL)isAnimating {
-    return _isAnimating;
+    self.animating = NO;
+    [self.imageView.layer removeAnimationForKey:@"rotation"];
 }
 
 @end
