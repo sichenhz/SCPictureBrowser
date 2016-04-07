@@ -172,7 +172,7 @@ static CGFloat const SCMinMaximumZoomScale = 2;
                         }
                         // 下载图片失败
                         else if (error) {
-                            [SCToastView showInView:self.scrollView text:@"下载失败"];
+                            [SCToastView showInView:self.scrollView text:@"下载失败" autoHide:YES];
                         }
                     }
                 }];

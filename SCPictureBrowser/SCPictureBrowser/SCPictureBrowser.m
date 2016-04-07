@@ -59,7 +59,7 @@ static CGFloat const kDismissalVelocity = 800.0;
 
 - (void)initializeCollectionView {
     self.automaticallyAdjustsScrollViewInsets = NO;
-
+    
     CGRect frame = self.view.frame;
     frame.size.width += SCPictureCellRightMargin;
     
@@ -310,7 +310,7 @@ static CGFloat const kDismissalVelocity = 800.0;
     CGPoint locationInView = [pan locationInView:pan.view];
     CGPoint velocity = [pan velocityInView:pan.view];
     CGFloat vectorDistance = sqrtf(powf(velocity.x, 2)+powf(velocity.y, 2));
-
+    
     if (pan.state == UIGestureRecognizerStateBegan) {
         self.isDraggingImage = CGRectContainsPoint(pictureCell.imageView.frame, locationInView);
         if (self.isDraggingImage) {
@@ -448,9 +448,9 @@ static CGFloat const kDismissalVelocity = 800.0;
 // save picture
 - (void)image:(UIImage *)image didFinishSavingWithError:(NSError *)error contextInfo:(void *)contextInfo {
     if (!error) {
-        [SCToastView showInView:self.view text:@"保存成功"];
+        [SCToastView showInView:self.view text:@"保存成功" autoHide:YES];
     } else {
-        [SCToastView showInView:self.view text:@"保存失败"];
+        [SCToastView showInView:self.view text:@"保存失败" autoHide:YES];
     }
 }
 

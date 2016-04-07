@@ -12,7 +12,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface SCToastView : UIView
 
-+ (void)showInView:(nonnull UIView *)view text:(nonnull NSString *)text;
++ (void)showInView:(nonnull UIView *)view text:(nonnull NSString *)text autoHide:(BOOL)autoHide;
+
++ (void)hideInView:(nonnull UIView *)view;
 
 @end
 

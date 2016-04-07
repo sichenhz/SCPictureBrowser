@@ -25,7 +25,7 @@ static void *toastKey = &toastKey;
         self.layer.cornerRadius = 10;
         self.layer.masksToBounds = YES;
         self.alpha = 0;
-
+        
         _backgroundView = [[UIView alloc] init];
         _backgroundView.backgroundColor = [UIColor blackColor];
         _backgroundView.alpha = .65;
@@ -42,12 +42,11 @@ static void *toastKey = &toastKey;
     return self;
 }
 
-+ (void)showInView:(UIView *)view text:(NSString *)text {
-    
++ (void)showInView:(nonnull UIView *)view text:(nonnull NSString *)text autoHide:(BOOL)autoHide {
     if (!view || !text) {
         return;
     }
-
+    
     SCToastView *toastView = objc_getAssociatedObject(view, toastKey);
     if (!toastView) {
         toastView = [[SCToastView alloc] init];
@@ -67,7 +66,7 @@ static void *toastKey = &toastKey;
     toastView.center = CGPointMake(view.frame.size.width / 2, view.frame.size.height / 2);
     toastView.backgroundView.frame = toastView.bounds;
     toastView.contentLabel.center = CGPointMake(CGRectGetMidX(toastView.bounds), CGRectGetMidY(toastView.bounds));
-
+    
     if (toastView.superview) {
         [toastView removeFromSuperview];
     }
@@ -78,17 +77,34 @@ static void *toastKey = &toastKey;
                              toastView.alpha = 1;
                          }
                          completion:^(BOOL finished) {
-                             [UIView animateWithDuration:0.3
-                                                   delay:1.5
-                                                 options:0
-                                              animations:^{
-                                                  toastView.alpha = 0;
-                                              }
-                                              completion:^(BOOL finished) {
-                                                  [toastView removeFromSuperview];
-                                              }];
+                             if (autoHide) {
+                                 [UIView animateWithDuration:0.3
+                                                       delay:1.5
+                                                     options:0
+                                                  animations:^{
+                                                      toastView.alpha = 0;
+                                                  }
+                                                  completion:^(BOOL finished) {
+                                                      [toastView removeFromSuperview];
+                                                  }];
+                             }
                          }];
     });
+}
+
++ (void)hideInView:(nonnull UIView *)view {
+    SCToastView *toastView = objc_getAssociatedObject(view, toastKey);
+    if (!view || !toastView) {
+        return;
+    }
+    
+    [UIView animateWithDuration:0.3
+                     animations:^{
+                         toastView.alpha = 0;
+                     }
+                     completion:^(BOOL finished) {
+                         [toastView removeFromSuperview];
+                     }];
 }
 
 @end
