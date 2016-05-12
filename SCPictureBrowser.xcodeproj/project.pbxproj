@@ -25,7 +25,6 @@
 		25F11B321CE4BC7800CCE314 /* loading_circle_large@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 25F11B2C1CE4BC7800CCE314 /* loading_circle_large@3x.png */; };
 		25F11B331CE4BC7800CCE314 /* trash@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 25F11B2D1CE4BC7800CCE314 /* trash@2x.png */; };
 		25F11B341CE4BC7800CCE314 /* trash@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 25F11B2E1CE4BC7800CCE314 /* trash@3x.png */; };
-		25F11B371CE4BF0C00CCE314 /* UIImage+Bundle.m in Sources */ = {isa = PBXBuildFile; fileRef = 25F11B361CE4BF0C00CCE314 /* UIImage+Bundle.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -56,8 +55,6 @@
 		25F11B2C1CE4BC7800CCE314 /* loading_circle_large@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "loading_circle_large@3x.png"; sourceTree = "<group>"; };
 		25F11B2D1CE4BC7800CCE314 /* trash@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "trash@2x.png"; sourceTree = "<group>"; };
 		25F11B2E1CE4BC7800CCE314 /* trash@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "trash@3x.png"; sourceTree = "<group>"; };
-		25F11B351CE4BF0C00CCE314 /* UIImage+Bundle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+Bundle.h"; sourceTree = "<group>"; };
-		25F11B361CE4BF0C00CCE314 /* UIImage+Bundle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+Bundle.m"; sourceTree = "<group>"; };
 		384034E8BE4BFE49C0B20B61 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		97F4B8004957A955530D6645 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -131,8 +128,6 @@
 				25F11B121CE4A52F00CCE314 /* SCToastView.m */,
 				25F11B081CE4A52F00CCE314 /* SCActivityIndicatorView.h */,
 				25F11B091CE4A52F00CCE314 /* SCActivityIndicatorView.m */,
-				25F11B351CE4BF0C00CCE314 /* UIImage+Bundle.h */,
-				25F11B361CE4BF0C00CCE314 /* UIImage+Bundle.m */,
 			);
 			path = SCPictureBrowser;
 			sourceTree = "<group>";
@@ -299,7 +294,6 @@
 				25F11AF51CE4A41100CCE314 /* AppDelegate.m in Sources */,
 				25F11AF21CE4A41100CCE314 /* main.m in Sources */,
 				25F11B181CE4A52F00CCE314 /* SCToastView.m in Sources */,
-				25F11B371CE4BF0C00CCE314 /* UIImage+Bundle.m in Sources */,
 				25F11B161CE4A52F00CCE314 /* SCPictureCell.m in Sources */,
 				25F11B171CE4A52F00CCE314 /* SCPictureItem.m in Sources */,
 				25F11B131CE4A52F00CCE314 /* SCActivityIndicatorView.m in Sources */,

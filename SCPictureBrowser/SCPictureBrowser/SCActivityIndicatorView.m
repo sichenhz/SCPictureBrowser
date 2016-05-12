@@ -7,7 +7,6 @@
 //
 
 #import "SCActivityIndicatorView.h"
-#import "UIImage+Bundle.h"
 
 @interface UIView(Extension)
 
@@ -76,20 +75,20 @@
         case SCActivityIndicatorViewStyleDefault:
             self.layer.cornerRadius = 5;
             self.backgroundColor = [UIColor colorWithRed:241/255.0 green:241/255.0 blue:241/255.0 alpha:1];
-            self.imageView.image = [UIImage bundleImageNamed:@"loading_circle"];
+            self.imageView.image = [UIImage imageNamed:[@"SCPictureBrowser.bundle" stringByAppendingPathComponent:@"loading_circle.png"]];
             self.size = CGSizeMake(44, 44);
             self.imageView.center = CGPointMake(CGRectGetMidX(self.frame), CGRectGetMidY(self.frame));
             break;
         case SCActivityIndicatorViewStyleCircle:
             self.layer.cornerRadius = 0;
             self.backgroundColor = [UIColor clearColor];
-            self.imageView.image = [UIImage bundleImageNamed:@"loading_circle"];
+            self.imageView.image = [UIImage imageNamed:[@"SCPictureBrowser.bundle" stringByAppendingPathComponent:@"loading_circle.png"]];
             self.size = self.imageView.size;
             break;
         case SCActivityIndicatorViewStyleCircleLarge:
             self.layer.cornerRadius = 0;
             self.backgroundColor = [UIColor clearColor];
-            self.imageView.image = [UIImage bundleImageNamed:@"loading_circle_large"];
+            self.imageView.image = [UIImage imageNamed:[@"SCPictureBrowser.bundle" stringByAppendingPathComponent:@"loading_circle_large"]];
             self.size = self.imageView.size;
             break;
     }

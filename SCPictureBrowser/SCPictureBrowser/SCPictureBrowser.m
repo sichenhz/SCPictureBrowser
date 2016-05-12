@@ -12,7 +12,6 @@
 #import "SDWebImagePrefetcher.h"
 #import "SCToastView.h"
 #import "SCAlertView.h"
-#import "UIImage+Bundle.h"
 
 static NSString * const reuseIdentifier = @"SCPictureCell";
 static CGFloat const kDismissalVelocity = 800.0;
@@ -95,7 +94,7 @@ static CGFloat const kDismissalVelocity = 800.0;
         _trashButton.frame = CGRectMake(_collectionView.frame.size.width - 60, 20, 30, 30);
         [_trashButton addTarget:self action:@selector(trashButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
         [self.view addSubview:_trashButton];
-        [_trashButton setImage:[UIImage bundleImageNamed:@"trash"] forState:UIControlStateNormal];
+        [_trashButton setImage:[UIImage imageNamed:[@"SCPictureBrowser.bundle" stringByAppendingPathComponent:@"trash.png"]] forState:UIControlStateNormal];
     }
 }
 
