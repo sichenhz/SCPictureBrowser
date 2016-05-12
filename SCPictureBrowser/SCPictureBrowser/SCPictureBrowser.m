@@ -16,7 +16,7 @@
 static NSString * const reuseIdentifier = @"SCPictureCell";
 static CGFloat const kDismissalVelocity = 800.0;
 
-@interface SCPictureBrowser()<UICollectionViewDataSource, UICollectionViewDelegate, SCPictureDelegate, UIScrollViewDelegate, UIActionSheetDelegate>
+@interface SCPictureBrowser()<UICollectionViewDataSource, UICollectionViewDelegate, SCPictureDelegate, UIScrollViewDelegate>
 
 @property (nonatomic, getter=isFirstShow) BOOL firstShow;
 @property (nonatomic, getter=isStatusBarHidden) BOOL statusBarHidden;
@@ -40,7 +40,6 @@ static CGFloat const kDismissalVelocity = 800.0;
 
 @implementation SCPictureBrowser
 {
-    UIActionSheet *_sheet;
     UICollectionView *_collectionView;
     UIPageControl *_pageControl;
     BOOL _isFromShowAction;
@@ -95,7 +94,7 @@ static CGFloat const kDismissalVelocity = 800.0;
         _trashButton.frame = CGRectMake(_collectionView.frame.size.width - 60, 20, 30, 30);
         [_trashButton addTarget:self action:@selector(trashButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
         [self.view addSubview:_trashButton];
-        [_trashButton setImage:[UIImage imageNamed:@"SCPictureBrowser.bundle/trash"] forState:UIControlStateNormal];
+        [_trashButton setImage:[UIImage imageNamed:@"trash"] forState:UIControlStateNormal];
     }
 }
 
