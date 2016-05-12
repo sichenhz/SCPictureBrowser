@@ -83,10 +83,8 @@
     browser.items = _items;
     browser.index = gesture.view.tag;
     browser.numberOfPrefetchURLs = 0;
+    browser.supportDelete = YES;
     [browser show];
-    
-    // 也可以通过present或push的方式打开browser
-    //    [self presentViewController:browser animated:YES completion:nil];
 }
 
 - (void)pictureBrowser:(SCPictureBrowser *)browser singleTapWithItem:(nonnull SCPictureItem *)item {

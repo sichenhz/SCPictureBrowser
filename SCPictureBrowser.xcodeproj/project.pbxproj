@@ -15,11 +15,11 @@
 		25F11AFD1CE4A41100CCE314 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 25F11AFC1CE4A41100CCE314 /* Assets.xcassets */; };
 		25F11B001CE4A41100CCE314 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 25F11AFE1CE4A41100CCE314 /* LaunchScreen.storyboard */; };
 		25F11B131CE4A52F00CCE314 /* SCActivityIndicatorView.m in Sources */ = {isa = PBXBuildFile; fileRef = 25F11B091CE4A52F00CCE314 /* SCActivityIndicatorView.m */; };
-		25F11B141CE4A52F00CCE314 /* SCPictureBrowser.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 25F11B0A1CE4A52F00CCE314 /* SCPictureBrowser.bundle */; };
 		25F11B151CE4A52F00CCE314 /* SCPictureBrowser.m in Sources */ = {isa = PBXBuildFile; fileRef = 25F11B0C1CE4A52F00CCE314 /* SCPictureBrowser.m */; };
 		25F11B161CE4A52F00CCE314 /* SCPictureCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 25F11B0E1CE4A52F00CCE314 /* SCPictureCell.m */; };
 		25F11B171CE4A52F00CCE314 /* SCPictureItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 25F11B101CE4A52F00CCE314 /* SCPictureItem.m */; };
 		25F11B181CE4A52F00CCE314 /* SCToastView.m in Sources */ = {isa = PBXBuildFile; fileRef = 25F11B121CE4A52F00CCE314 /* SCToastView.m */; };
+		25F11B1A1CE4B2A200CCE314 /* SCPictureBrowser.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 25F11B191CE4B2A200CCE314 /* SCPictureBrowser.bundle */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,7 +36,6 @@
 		25F11B011CE4A41100CCE314 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		25F11B081CE4A52F00CCE314 /* SCActivityIndicatorView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SCActivityIndicatorView.h; sourceTree = "<group>"; };
 		25F11B091CE4A52F00CCE314 /* SCActivityIndicatorView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SCActivityIndicatorView.m; sourceTree = "<group>"; };
-		25F11B0A1CE4A52F00CCE314 /* SCPictureBrowser.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = SCPictureBrowser.bundle; sourceTree = "<group>"; };
 		25F11B0B1CE4A52F00CCE314 /* SCPictureBrowser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SCPictureBrowser.h; sourceTree = "<group>"; };
 		25F11B0C1CE4A52F00CCE314 /* SCPictureBrowser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SCPictureBrowser.m; sourceTree = "<group>"; };
 		25F11B0D1CE4A52F00CCE314 /* SCPictureCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SCPictureCell.h; sourceTree = "<group>"; };
@@ -45,6 +44,7 @@
 		25F11B101CE4A52F00CCE314 /* SCPictureItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SCPictureItem.m; sourceTree = "<group>"; };
 		25F11B111CE4A52F00CCE314 /* SCToastView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SCToastView.h; sourceTree = "<group>"; };
 		25F11B121CE4A52F00CCE314 /* SCToastView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SCToastView.m; sourceTree = "<group>"; };
+		25F11B191CE4B2A200CCE314 /* SCPictureBrowser.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = SCPictureBrowser.bundle; sourceTree = "<group>"; };
 		384034E8BE4BFE49C0B20B61 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		97F4B8004957A955530D6645 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -109,7 +109,7 @@
 			children = (
 				25F11B0B1CE4A52F00CCE314 /* SCPictureBrowser.h */,
 				25F11B0C1CE4A52F00CCE314 /* SCPictureBrowser.m */,
-				25F11B0A1CE4A52F00CCE314 /* SCPictureBrowser.bundle */,
+				25F11B191CE4B2A200CCE314 /* SCPictureBrowser.bundle */,
 				25F11B0D1CE4A52F00CCE314 /* SCPictureCell.h */,
 				25F11B0E1CE4A52F00CCE314 /* SCPictureCell.m */,
 				25F11B0F1CE4A52F00CCE314 /* SCPictureItem.h */,
@@ -200,7 +200,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				25F11B001CE4A41100CCE314 /* LaunchScreen.storyboard in Resources */,
-				25F11B141CE4A52F00CCE314 /* SCPictureBrowser.bundle in Resources */,
+				25F11B1A1CE4B2A200CCE314 /* SCPictureBrowser.bundle in Resources */,
 				25F11AFD1CE4A41100CCE314 /* Assets.xcassets in Resources */,
 				25F11AFB1CE4A41100CCE314 /* Main.storyboard in Resources */,
 			);
