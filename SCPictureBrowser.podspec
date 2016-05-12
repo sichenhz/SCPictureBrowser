@@ -92,6 +92,9 @@ Pod::Spec.new do |s|
   #
 
   s.source_files  = "SCPictureBrowser/SCPictureBrowser/*.{h,m}"
+  s.resource_bundles = {
+    'SCPictureBrowser' => ['SCPictureBrowser/Assets/*.png']
+  }
 
   # s.public_header_files = "Classes/**/*.h"
 
