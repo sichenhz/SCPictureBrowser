@@ -91,9 +91,9 @@ Pod::Spec.new do |s|
   #  Not including the public_header_files will make all headers public.
   #
 
-  s.source_files  = "SCPictureBrowser/SCPictureBrowser/*.{h,m}"
+  s.source_files  = 'SCPictureBrowser/SCPictureBrowser/*.{h,m}"
   s.resource_bundles = {
-    'SCPictureBrowser' => ['SCPictureBrowser/Assets/*.png']
+    'SCPictureBrowser' => ['SCPictureBrowser/Sources/*.png']
   }
 
   # s.public_header_files = "Classes/**/*.h"
