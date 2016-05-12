@@ -93,7 +93,7 @@ Pod::Spec.new do |s|
 
   s.source_files  = 'SCPictureBrowser/SCPictureBrowser/*.{h,m}'
   s.resource_bundles = {
-    'SCPictureBrowser' => ['SCPictureBrowser/Sources/*.png']
+    'SCPictureBrowser' => ['SCPictureBrowser/SCPictureBrowser.bundle/*.png']
   }
 
   # s.public_header_files = "Classes/**/*.h"
@@ -108,7 +108,7 @@ Pod::Spec.new do |s|
   #
 
   # s.resource  = "icon.png"
-  # s.resources = "Resources/*.png"
+  # s.resources = "Resources.bundle/*.png"
 
   # s.preserve_paths = "FilesToSave", "MoreFilesToSave"
 

@@ -19,12 +19,7 @@
 		25F11B161CE4A52F00CCE314 /* SCPictureCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 25F11B0E1CE4A52F00CCE314 /* SCPictureCell.m */; };
 		25F11B171CE4A52F00CCE314 /* SCPictureItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 25F11B101CE4A52F00CCE314 /* SCPictureItem.m */; };
 		25F11B181CE4A52F00CCE314 /* SCToastView.m in Sources */ = {isa = PBXBuildFile; fileRef = 25F11B121CE4A52F00CCE314 /* SCToastView.m */; };
-		25F11B2F1CE4BC7800CCE314 /* loading_circle@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 25F11B291CE4BC7800CCE314 /* loading_circle@2x.png */; };
-		25F11B301CE4BC7800CCE314 /* loading_circle@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 25F11B2A1CE4BC7800CCE314 /* loading_circle@3x.png */; };
-		25F11B311CE4BC7800CCE314 /* loading_circle_large@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 25F11B2B1CE4BC7800CCE314 /* loading_circle_large@2x.png */; };
-		25F11B321CE4BC7800CCE314 /* loading_circle_large@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 25F11B2C1CE4BC7800CCE314 /* loading_circle_large@3x.png */; };
-		25F11B331CE4BC7800CCE314 /* trash@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 25F11B2D1CE4BC7800CCE314 /* trash@2x.png */; };
-		25F11B341CE4BC7800CCE314 /* trash@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 25F11B2E1CE4BC7800CCE314 /* trash@3x.png */; };
+		25F11B3B1CE4C78900CCE314 /* SCPictureBrowser.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 25F11B3A1CE4C78900CCE314 /* SCPictureBrowser.bundle */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -49,12 +44,7 @@
 		25F11B101CE4A52F00CCE314 /* SCPictureItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SCPictureItem.m; sourceTree = "<group>"; };
 		25F11B111CE4A52F00CCE314 /* SCToastView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SCToastView.h; sourceTree = "<group>"; };
 		25F11B121CE4A52F00CCE314 /* SCToastView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SCToastView.m; sourceTree = "<group>"; };
-		25F11B291CE4BC7800CCE314 /* loading_circle@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "loading_circle@2x.png"; sourceTree = "<group>"; };
-		25F11B2A1CE4BC7800CCE314 /* loading_circle@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "loading_circle@3x.png"; sourceTree = "<group>"; };
-		25F11B2B1CE4BC7800CCE314 /* loading_circle_large@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "loading_circle_large@2x.png"; sourceTree = "<group>"; };
-		25F11B2C1CE4BC7800CCE314 /* loading_circle_large@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "loading_circle_large@3x.png"; sourceTree = "<group>"; };
-		25F11B2D1CE4BC7800CCE314 /* trash@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "trash@2x.png"; sourceTree = "<group>"; };
-		25F11B2E1CE4BC7800CCE314 /* trash@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "trash@3x.png"; sourceTree = "<group>"; };
+		25F11B3A1CE4C78900CCE314 /* SCPictureBrowser.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = SCPictureBrowser.bundle; sourceTree = "<group>"; };
 		384034E8BE4BFE49C0B20B61 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		97F4B8004957A955530D6645 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -92,7 +82,7 @@
 		25F11AEF1CE4A41100CCE314 /* SCPictureBrowser */ = {
 			isa = PBXGroup;
 			children = (
-				25F11B281CE4BC7800CCE314 /* Sources */,
+				25F11B3A1CE4C78900CCE314 /* SCPictureBrowser.bundle */,
 				25F11B071CE4A52F00CCE314 /* SCPictureBrowser */,
 				25F11AF31CE4A41100CCE314 /* AppDelegate.h */,
 				25F11AF41CE4A41100CCE314 /* AppDelegate.m */,
@@ -130,19 +120,6 @@
 				25F11B091CE4A52F00CCE314 /* SCActivityIndicatorView.m */,
 			);
 			path = SCPictureBrowser;
-			sourceTree = "<group>";
-		};
-		25F11B281CE4BC7800CCE314 /* Sources */ = {
-			isa = PBXGroup;
-			children = (
-				25F11B291CE4BC7800CCE314 /* loading_circle@2x.png */,
-				25F11B2A1CE4BC7800CCE314 /* loading_circle@3x.png */,
-				25F11B2B1CE4BC7800CCE314 /* loading_circle_large@2x.png */,
-				25F11B2C1CE4BC7800CCE314 /* loading_circle_large@3x.png */,
-				25F11B2D1CE4BC7800CCE314 /* trash@2x.png */,
-				25F11B2E1CE4BC7800CCE314 /* trash@3x.png */,
-			);
-			path = Sources;
 			sourceTree = "<group>";
 		};
 		7BCBC000F726A2AA21E322F4 /* Frameworks */ = {
@@ -223,14 +200,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				25F11B001CE4A41100CCE314 /* LaunchScreen.storyboard in Resources */,
-				25F11B2F1CE4BC7800CCE314 /* loading_circle@2x.png in Resources */,
+				25F11B3B1CE4C78900CCE314 /* SCPictureBrowser.bundle in Resources */,
 				25F11AFD1CE4A41100CCE314 /* Assets.xcassets in Resources */,
-				25F11B331CE4BC7800CCE314 /* trash@2x.png in Resources */,
-				25F11B321CE4BC7800CCE314 /* loading_circle_large@3x.png in Resources */,
-				25F11B341CE4BC7800CCE314 /* trash@3x.png in Resources */,
 				25F11AFB1CE4A41100CCE314 /* Main.storyboard in Resources */,
-				25F11B301CE4BC7800CCE314 /* loading_circle@3x.png in Resources */,
-				25F11B311CE4BC7800CCE314 /* loading_circle_large@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
