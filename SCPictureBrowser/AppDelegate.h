@@ -2,7 +2,7 @@
 //  AppDelegate.h
 //  SCPictureBrowser
 //
-//  Created by sichenwang on 16/3/21.
+//  Created by sichenwang on 16/5/12.
 //  Copyright © 2016年 sichenwang. All rights reserved.
 //
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0720"
+   LastUpgradeVersion = "0730"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "2552303C1C9FE016009F3091"
+               BlueprintIdentifier = "25F11AEC1CE4A41100CCE314"
                BuildableName = "SCPictureBrowser.app"
                BlueprintName = "SCPictureBrowser"
                ReferencedContainer = "container:SCPictureBrowser.xcodeproj">
@@ -32,7 +32,7 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "2552303C1C9FE016009F3091"
+            BlueprintIdentifier = "25F11AEC1CE4A41100CCE314"
             BuildableName = "SCPictureBrowser.app"
             BlueprintName = "SCPictureBrowser"
             ReferencedContainer = "container:SCPictureBrowser.xcodeproj">
@@ -55,7 +55,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "2552303C1C9FE016009F3091"
+            BlueprintIdentifier = "25F11AEC1CE4A41100CCE314"
             BuildableName = "SCPictureBrowser.app"
             BlueprintName = "SCPictureBrowser"
             ReferencedContainer = "container:SCPictureBrowser.xcodeproj">
@@ -74,7 +74,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "2552303C1C9FE016009F3091"
+            BlueprintIdentifier = "25F11AEC1CE4A41100CCE314"
             BuildableName = "SCPictureBrowser.app"
             BlueprintName = "SCPictureBrowser"
             ReferencedContainer = "container:SCPictureBrowser.xcodeproj">

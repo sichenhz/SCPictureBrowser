@@ -22,6 +22,12 @@ static CGFloat const kDismissalVelocity = 800.0;
 @property (nonatomic, getter=isStatusBarHidden) BOOL statusBarHidden;
 @property (nonatomic, getter=isBrowsing) BOOL browsing;
 
+// delete
+@property (nonatomic, strong) UIButton *trashButton;
+@property (nonatomic, strong) NSArray *originItems;
+@property (nonatomic, strong) NSMutableArray *removedItems;
+@property (nonatomic, strong) NSMutableIndexSet *indexSet;
+
 // UIDynamics
 @property (nonatomic, strong) UIDynamicAnimator *animator;
 @property (nonatomic, strong) UIAttachmentBehavior *attachmentBehavior;
@@ -59,7 +65,7 @@ static CGFloat const kDismissalVelocity = 800.0;
 
 - (void)initializeCollectionView {
     self.automaticallyAdjustsScrollViewInsets = NO;
-    
+
     CGRect frame = self.view.frame;
     frame.size.width += SCPictureCellRightMargin;
     
@@ -80,6 +86,17 @@ static CGFloat const kDismissalVelocity = 800.0;
     _collectionView.contentSize = CGSizeMake(_collectionView.frame.size.width * self.items.count, 0);
     _collectionView.contentOffset = CGPointMake(self.index * _collectionView.frame.size.width, 0);
     [self.view addSubview:_collectionView];
+    
+    if (self.supportDelete) {
+        _originItems = [self.items copy];
+        _removedItems = [NSMutableArray array];
+        _indexSet = [NSMutableIndexSet indexSet];
+        _trashButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        _trashButton.frame = CGRectMake(_collectionView.frame.size.width - 60, 20, 30, 30);
+        [_trashButton addTarget:self action:@selector(trashButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+        [self.view addSubview:_trashButton];
+        [_trashButton setImage:[UIImage imageNamed:@"SCPictureBrowser.bundle/trash"] forState:UIControlStateNormal];
+    }
 }
 
 - (void)initializePageControl {
@@ -200,7 +217,7 @@ static CGFloat const kDismissalVelocity = 800.0;
             frame.origin.x += (cell.frame.size.width * self.index);
             cell.imageView.frame = frame;
         }
-        [UIView animateWithDuration:0.4 animations:^{
+        [UIView animateWithDuration:0.3 animations:^{
             cell.imageView.frame = [cell imageViewRectWithImageSize:image.size];
         } completion:^(BOOL finished) {
             cell.enableDoubleTap = YES;
@@ -212,7 +229,7 @@ static CGFloat const kDismissalVelocity = 800.0;
         [self setPageControlHidden:NO];
         cell.imageView.frame = [cell imageViewRectWithImageSize:image.size];
         cell.alpha = 0;
-        [UIView animateWithDuration:0.4 animations:^{
+        [UIView animateWithDuration:0.3 animations:^{
             cell.alpha = 1;
         } completion:^(BOOL finished) {
             cell.enableDoubleTap = YES;
@@ -229,6 +246,58 @@ static CGFloat const kDismissalVelocity = 800.0;
             _pageControl.hidden = NO;
         }
     }
+}
+
+- (void)trashButtonPressed:(id)sender {
+    SCAlertView *alertView = [SCAlertView alertViewWithTitle:@"删除这张图片？" message:nil style:SCAlertViewStyleAlert];
+    [alertView addAction:[SCAlertAction actionWithTitle:@"取消" style:SCAlertActionStyleCancel handler:nil]];
+    [alertView addAction:[SCAlertAction actionWithTitle:@"删除" style:SCAlertActionStyleConfirm handler:^(SCAlertAction * _Nonnull action) {
+        [self.removedItems addObject:self.items[self.index]];
+        for (SCPictureItem *item in self.originItems) {
+            if ([item isEqual:self.items[self.index]]) {
+                [self.indexSet addIndex:[self.items indexOfObject:item]];
+                break;
+            }
+        }
+        if (self.items.count > 1) {
+            NSMutableArray *arrM = [NSMutableArray arrayWithArray:self.items];
+            [arrM removeObjectAtIndex:self.index];
+            self.items = arrM;
+            [_collectionView reloadData];
+        } else {
+            SCPictureCell *pictureCell = (SCPictureCell *)[_collectionView cellForItemAtIndexPath:[NSIndexPath indexPathForItem:self.index inSection:0]];
+            [self endBrowseWithCell:pictureCell];
+        }
+        [SCToastView showInView:[UIApplication sharedApplication].keyWindow text:@"删除成功" duration:1.5 autoHide:YES];
+    }]];
+    [alertView show];
+}
+
+- (void)endBrowseWithCell:(SCPictureCell *)pictureCell {
+    [[UIApplication sharedApplication] setStatusBarHidden:self.isStatusBarHidden withAnimation:UIStatusBarAnimationNone];
+    [self setPageControlHidden:YES];
+    SCPictureItem *item = self.items[self.index];
+    [UIView animateWithDuration:0.3 animations:^{
+        if (item.sourceView) {
+            self.view.backgroundColor = [UIColor clearColor];
+            self.trashButton.alpha = 0;
+            pictureCell.imageView.frame = [item.sourceView convertRect:item.sourceView.bounds toView:pictureCell];
+        } else {
+            self.view.alpha = 0;
+        }
+    } completion:^(BOOL finished) {
+        self.browsing = NO;
+        [self.view removeFromSuperview];
+        [self removeFromParentViewController];
+        
+        if (self.supportDelete) {
+            if (self.removedItems.count) {
+                if ([self.delegate respondsToSelector:@selector(pictureBrowser:didDeleteItems:indexSet:)]) {
+                    [self.delegate pictureBrowser:self didDeleteItems:[self.removedItems copy] indexSet:[self.indexSet copy]];
+                }
+            }
+        }
+    }];
 }
 
 #pragma mark - UICollectionViewDataSource
@@ -270,21 +339,7 @@ static CGFloat const kDismissalVelocity = 800.0;
 
 - (void)pictureCell:(SCPictureCell *)pictureCell singleTap:(UITapGestureRecognizer *)singleTap {
     if (_isFromShowAction) {
-        [[UIApplication sharedApplication] setStatusBarHidden:self.isStatusBarHidden withAnimation:UIStatusBarAnimationNone];
-        [self setPageControlHidden:YES];
-        SCPictureItem *item = self.items[self.index];
-        [UIView animateWithDuration:0.4 animations:^{
-            if (item.sourceView) {
-                self.view.backgroundColor = [UIColor clearColor];
-                pictureCell.imageView.frame = [item.sourceView convertRect:item.sourceView.bounds toView:pictureCell];
-            } else {
-                self.view.alpha = 0;
-            }
-        } completion:^(BOOL finished) {
-            self.browsing = NO;
-            [self.view removeFromSuperview];
-            [self removeFromParentViewController];
-        }];
+        [self endBrowseWithCell:pictureCell];
     }
 }
 
@@ -310,7 +365,7 @@ static CGFloat const kDismissalVelocity = 800.0;
     CGPoint locationInView = [pan locationInView:pan.view];
     CGPoint velocity = [pan velocityInView:pan.view];
     CGFloat vectorDistance = sqrtf(powf(velocity.x, 2)+powf(velocity.y, 2));
-    
+
     if (pan.state == UIGestureRecognizerStateBegan) {
         self.isDraggingImage = CGRectContainsPoint(pictureCell.imageView.frame, locationInView);
         if (self.isDraggingImage) {
@@ -372,7 +427,7 @@ static CGFloat const kDismissalVelocity = 800.0;
 - (void)dismiss {
     [[UIApplication sharedApplication] setStatusBarHidden:self.isStatusBarHidden withAnimation:UIStatusBarAnimationNone];
     [self setPageControlHidden:YES];
-    [UIView animateWithDuration:0.4 animations:^{
+    [UIView animateWithDuration:0.3 animations:^{
         self.view.alpha = 0;
     } completion:^(BOOL finished) {
         self.browsing = NO;
@@ -448,9 +503,9 @@ static CGFloat const kDismissalVelocity = 800.0;
 // save picture
 - (void)image:(UIImage *)image didFinishSavingWithError:(NSError *)error contextInfo:(void *)contextInfo {
     if (!error) {
-        [SCToastView showInView:self.view text:@"保存成功" autoHide:YES];
+        [SCToastView showInView:[UIApplication sharedApplication].keyWindow text:@"保存成功" duration:1.5 autoHide:YES];
     } else {
-        [SCToastView showInView:self.view text:@"保存失败" autoHide:YES];
+        [SCToastView showInView:[UIApplication sharedApplication].keyWindow text:@"保存失败" duration:1.5 autoHide:YES];
     }
 }
 

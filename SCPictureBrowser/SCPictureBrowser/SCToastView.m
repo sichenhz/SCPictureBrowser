@@ -25,7 +25,7 @@ static void *toastKey = &toastKey;
         self.layer.cornerRadius = 10;
         self.layer.masksToBounds = YES;
         self.alpha = 0;
-        
+
         _backgroundView = [[UIView alloc] init];
         _backgroundView.backgroundColor = [UIColor blackColor];
         _backgroundView.alpha = .65;
@@ -42,7 +42,7 @@ static void *toastKey = &toastKey;
     return self;
 }
 
-+ (void)showInView:(nonnull UIView *)view text:(nonnull NSString *)text autoHide:(BOOL)autoHide {
++ (void)showInView:(nonnull UIView *)view text:(nonnull NSString *)text duration:(CGFloat)duration autoHide:(BOOL)autoHide {
     if (!view || !text) {
         return;
     }
@@ -79,7 +79,7 @@ static void *toastKey = &toastKey;
                          completion:^(BOOL finished) {
                              if (autoHide) {
                                  [UIView animateWithDuration:0.3
-                                                       delay:1.5
+                                                       delay:duration
                                                      options:0
                                                   animations:^{
                                                       toastView.alpha = 0;
@@ -106,5 +106,14 @@ static void *toastKey = &toastKey;
                          [toastView removeFromSuperview];
                      }];
 }
+
++ (BOOL)isShowingInView:(nonnull UIView *)view {
+    SCToastView *toastView = objc_getAssociatedObject(view, toastKey);
+    if (!view || !toastView || !toastView.superview) {
+        return NO;
+    }
+    return YES;
+}
+
 
 @end

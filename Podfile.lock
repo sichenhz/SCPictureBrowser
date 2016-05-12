@@ -1,0 +1,24 @@
+PODS:
+  - SCAlertView (1.0.0)
+  - SDWebImage (3.7.6):
+    - SDWebImage/Core (= 3.7.6)
+  - SDWebImage/Core (3.7.6)
+
+DEPENDENCIES:
+  - SCAlertView (from `https://github.com/SeJasonWang/SCAlertView.git`)
+  - SDWebImage (~> 3.7.5)
+
+EXTERNAL SOURCES:
+  SCAlertView:
+    :git: https://github.com/SeJasonWang/SCAlertView.git
+
+CHECKOUT OPTIONS:
+  SCAlertView:
+    :commit: 4f051a750b94bddec09c64aaf422f8813d51163f
+    :git: https://github.com/SeJasonWang/SCAlertView.git
+
+SPEC CHECKSUMS:
+  SCAlertView: e16c8c08b3c365c94a7c3e2a8c2e6a698dff8697
+  SDWebImage: c325cf02c30337336b95beff20a13df489ec0ec9
+
+COCOAPODS: 0.39.0

@@ -1,0 +1,20 @@
+{
+  "name": "SCAlertView",
+  "version": "1.0.0",
+  "summary": "A layout similar to UICollectionViewFlowLayout.",
+  "description": "A layout similar to UICollectionViewFlowLayout.",
+  "homepage": "https://github.com/SeJasonWang/SCAlertView",
+  "license": "MIT",
+  "authors": {
+    "wangsichen": "sichenwangrd@meilishuo.com"
+  },
+  "platforms": {
+    "ios": "7.0"
+  },
+  "source": {
+    "git": "https://github.com/SeJasonWang/SCAlertView.git",
+    "tag": "1.0.0"
+  },
+  "source_files": "SCAlertView/SCAlertView/*.{h,m}",
+  "requires_arc": true
+}

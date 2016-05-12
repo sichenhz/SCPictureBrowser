@@ -31,6 +31,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) BOOL alwaysPageControlHidden;
 
 /**
+ *  是否支持删除功能，默认为NO
+ */
+@property (nonatomic) BOOL supportDelete;
+
+/**
  *  如果通过present或push方式来浏览图片，需外部自己实现结束浏览的事件
  */
 - (void)show;
@@ -42,6 +47,7 @@ NS_ASSUME_NONNULL_BEGIN
 @optional
 
 - (void)pictureBrowser:(SCPictureBrowser *)browser didChangePageAtIndex:(NSInteger)index;
+- (void)pictureBrowser:(SCPictureBrowser *)browser didDeleteItems:(NSArray *)items indexSet:(NSIndexSet *)indexSet;
 
 @end
 
