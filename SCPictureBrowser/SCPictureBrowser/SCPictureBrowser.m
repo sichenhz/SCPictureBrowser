@@ -254,7 +254,7 @@ static CGFloat const kDismissalVelocity = 800.0;
         [self.removedItems addObject:self.items[self.index]];
         for (SCPictureItem *item in self.originItems) {
             if ([item isEqual:self.items[self.index]]) {
-                [self.indexSet addIndex:[self.items indexOfObject:item]];
+                [self.indexSet addIndex:[self.originItems indexOfObject:item]];
                 break;
             }
         }
