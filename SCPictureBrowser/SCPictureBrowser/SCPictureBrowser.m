@@ -47,6 +47,13 @@ static CGFloat const kDismissalVelocity = 800.0;
 
 #pragma mark - Life Cycle
 
+- (instancetype)init {
+    if (self = [super init]) {
+        _contentMode = UIViewContentModeScaleAspectFill;
+    }
+    return self;
+}
+
 - (void)loadView {
     self.view = [[UIView alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.view.backgroundColor = [UIColor blackColor];
@@ -307,6 +314,7 @@ static CGFloat const kDismissalVelocity = 800.0;
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     SCPictureCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:reuseIdentifier forIndexPath:indexPath];
+    cell.imageView.contentMode = self.contentMode;
     cell.enableDynamicsDismiss = self.items.count == 1 ? YES : NO;
     cell.delegate = self;
     

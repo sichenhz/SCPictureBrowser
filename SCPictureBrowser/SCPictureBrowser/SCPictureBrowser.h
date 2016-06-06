@@ -36,6 +36,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) BOOL supportDelete;
 
 /**
+ *  图片缩放时的contentMode, 为了缩放时的动画能匹配，该值应该和放大前的来源UIImageView模式一样，默认为UIViewContentModeScaleAspectFill
+ */
+@property (nonatomic) UIViewContentMode contentMode;
+
+/**
  *  如果通过present或push方式来浏览图片，需外部自己实现结束浏览的事件
  */
 - (void)show;
