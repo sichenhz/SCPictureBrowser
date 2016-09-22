@@ -22,6 +22,7 @@ static void *toastKey = &toastKey;
 
 - (instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
+        self.userInteractionEnabled = NO;
         self.layer.cornerRadius = 10;
         self.layer.masksToBounds = YES;
         self.alpha = 0;
