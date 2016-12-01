@@ -53,6 +53,10 @@ static CGFloat const kDismissalVelocity = 1000.0;
     return self.statusBarHidden;
 }
 
+- (UIStatusBarStyle)preferredStatusBarStyle {
+    return UIStatusBarStyleLightContent;
+}
+
 #pragma mark - Life Cycle
 
 - (instancetype)init {
