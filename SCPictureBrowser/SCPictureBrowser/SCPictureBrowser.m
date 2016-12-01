@@ -14,13 +14,15 @@
 #import "SCAlertView.h"
 
 static NSString * const reuseIdentifier = @"SCPictureCell";
-static CGFloat const kDismissalVelocity = 800.0;
+static CGFloat const kDismissalVelocity = 1000.0;
 
 @interface SCPictureBrowser()<UICollectionViewDataSource, UICollectionViewDelegate, SCPictureDelegate, UIScrollViewDelegate>
 
 @property (nonatomic, getter=isFirstShow) BOOL firstShow;
-@property (nonatomic, getter=isStatusBarHidden) BOOL statusBarHidden;
 @property (nonatomic, getter=isBrowsing) BOOL browsing;
+
+@property (nonatomic,strong) UIImageView *screenshotImageView;
+@property (nonatomic,strong) UIImage *screenshot;
 
 // delete
 @property (nonatomic, strong) UIButton *trashButton;
@@ -45,76 +47,38 @@ static CGFloat const kDismissalVelocity = 800.0;
     BOOL _isFromShowAction;
 }
 
+- (BOOL)prefersStatusBarHidden {
+    return YES;
+}
+
 #pragma mark - Life Cycle
 
 - (instancetype)init {
     if (self = [super init]) {
+        self.automaticallyAdjustsScrollViewInsets = NO;
         _contentMode = UIViewContentModeScaleAspectFill;
+        _screenshot = [self screenshotFromView:[UIApplication sharedApplication].keyWindow];
     }
     return self;
 }
 
 - (void)loadView {
     self.view = [[UIView alloc] initWithFrame:[UIScreen mainScreen].bounds];
-    self.view.backgroundColor = [UIColor blackColor];
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    [self initializeCollectionView];
-    [self initializePageControl];
+    [self.view addSubview:self.screenshotImageView];
+    [self.view addSubview:self.collectionView];
+    [self.view addSubview:self.pageControl];
+    if (self.supportDelete) {
+        [self.view addSubview:self.trashButton];
+    }
+
     
     self.firstShow = YES;
     self.browsing = YES;
-}
-
-- (void)initializeCollectionView {
-    self.automaticallyAdjustsScrollViewInsets = NO;
-
-    CGRect frame = self.view.frame;
-    frame.size.width += SCPictureCellRightMargin;
-    
-    UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
-    layout.itemSize = frame.size;
-    layout.minimumInteritemSpacing = 0;
-    layout.minimumLineSpacing = 0;
-    layout.sectionInset = UIEdgeInsetsZero;
-    layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
-    
-    _collectionView = [[UICollectionView alloc] initWithFrame:frame collectionViewLayout:layout];
-    _collectionView.dataSource = self;
-    _collectionView.delegate = self;
-    [_collectionView registerClass:[SCPictureCell class] forCellWithReuseIdentifier:reuseIdentifier];
-    _collectionView.showsHorizontalScrollIndicator = NO;
-    _collectionView.pagingEnabled = YES;
-    _collectionView.backgroundColor = [UIColor clearColor];
-    _collectionView.contentSize = CGSizeMake(_collectionView.frame.size.width * self.items.count, 0);
-    _collectionView.contentOffset = CGPointMake(self.index * _collectionView.frame.size.width, 0);
-    [self.view addSubview:_collectionView];
-    
-    if (self.supportDelete) {
-        _originItems = [self.items copy];
-        _removedItems = [NSMutableArray array];
-        _indexSet = [NSMutableIndexSet indexSet];
-        _trashButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        _trashButton.frame = CGRectMake(_collectionView.frame.size.width - 60, 20, 30, 30);
-        [_trashButton addTarget:self action:@selector(trashButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-        [self.view addSubview:_trashButton];
-        [_trashButton setImage:[UIImage imageNamed:[@"SCPictureBrowser.bundle" stringByAppendingPathComponent:@"trash.png"]] forState:UIControlStateNormal];
-    }
-}
-
-- (void)initializePageControl {
-    _pageControl = [[UIPageControl alloc] init];
-    [self setPageControlHidden:YES];
-    _pageControl.numberOfPages = self.items.count;
-    _pageControl.currentPage = self.index;
-    CGPoint center = _pageControl.center;
-    center.x = self.view.center.x;
-    center.y = CGRectGetMaxY(self.view.frame) - _pageControl.frame.size.height / 2 - 20;
-    _pageControl.center = center;
-    [self.view addSubview:_pageControl];
 }
 
 #pragma mark - Public Method
@@ -126,11 +90,7 @@ static CGFloat const kDismissalVelocity = 800.0;
     
     _isFromShowAction = YES;
     UIWindow *window = [UIApplication sharedApplication].keyWindow;
-    [window addSubview:self.view];
-    [window.rootViewController addChildViewController:self];
-    
-    self.statusBarHidden = [UIApplication sharedApplication].isStatusBarHidden;
-    [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationNone];
+    [window.rootViewController presentViewController:self animated:NO completion:nil];
 }
 
 #pragma mark - Setter
@@ -158,7 +118,78 @@ static CGFloat const kDismissalVelocity = 800.0;
     [self layoutData];
 }
 
+#pragma mark - Getter
+
+- (UIImageView *)screenshotImageView {
+    if (_screenshotImageView) {
+        return _screenshotImageView;
+    }
+    _screenshotImageView = [[UIImageView alloc] initWithFrame:[UIScreen mainScreen].bounds];
+    _screenshotImageView.image = self.screenshot;
+    return _screenshotImageView;
+}
+
+- (UICollectionView *)collectionView {
+    if (!_collectionView) {
+        CGRect frame = self.view.frame;
+        frame.size.width += SCPictureCellRightMargin;
+        
+        UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
+        layout.itemSize = frame.size;
+        layout.minimumInteritemSpacing = 0;
+        layout.minimumLineSpacing = 0;
+        layout.sectionInset = UIEdgeInsetsZero;
+        layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
+        
+        _collectionView = [[UICollectionView alloc] initWithFrame:frame collectionViewLayout:layout];
+        _collectionView.backgroundColor = [UIColor clearColor];
+        _collectionView.dataSource = self;
+        _collectionView.delegate = self;
+        [_collectionView registerClass:[SCPictureCell class] forCellWithReuseIdentifier:reuseIdentifier];
+        _collectionView.showsHorizontalScrollIndicator = NO;
+        _collectionView.pagingEnabled = YES;
+        _collectionView.contentSize = CGSizeMake(_collectionView.frame.size.width * self.items.count, 0);
+        _collectionView.contentOffset = CGPointMake(self.index * _collectionView.frame.size.width, 0);
+    }
+    
+    return _collectionView;
+}
+
+- (UIPageControl *)pageControl {
+    _pageControl = [[UIPageControl alloc] init];
+    [self setPageControlHidden:YES];
+    _pageControl.numberOfPages = self.items.count;
+    _pageControl.currentPage = self.index;
+    CGPoint center = _pageControl.center;
+    center.x = self.view.center.x;
+    center.y = CGRectGetMaxY(self.view.frame) - _pageControl.frame.size.height / 2 - 20;
+    _pageControl.center = center;
+
+    return _pageControl;
+}
+
+- (UIButton *)trashButton {
+    if (!_trashButton) {
+        _originItems = [self.items copy];
+        _removedItems = [NSMutableArray array];
+        _indexSet = [NSMutableIndexSet indexSet];
+        _trashButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        _trashButton.frame = CGRectMake(_collectionView.frame.size.width - 60, 20, 30, 30);
+        [_trashButton addTarget:self action:@selector(trashButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+        [_trashButton setImage:[UIImage imageNamed:[@"SCPictureBrowser.bundle" stringByAppendingPathComponent:@"trash.png"]] forState:UIControlStateNormal];
+    }
+    return _trashButton;
+}
+
 #pragma mark - Private Method
+
+- (UIImage *)screenshotFromView:(UIView *)view {
+    UIGraphicsBeginImageContextWithOptions(view.bounds.size,NO,[UIScreen mainScreen].scale);
+    [view.layer renderInContext:UIGraphicsGetCurrentContext()];
+    UIImage *screenshotImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return screenshotImage;
+}
 
 - (void)layoutData {
     _collectionView.contentSize = CGSizeMake(_collectionView.frame.size.width * self.items.count, 0);
@@ -214,6 +245,9 @@ static CGFloat const kDismissalVelocity = 800.0;
 }
 
 - (void)showImage:(UIImage *)image item:(SCPictureItem *)item cell:(SCPictureCell *)cell cacheType:(SDImageCacheType)cacheType {
+    
+    self.collectionView.backgroundColor = [UIColor blackColor];
+
     cell.imageView.image = image;
     
     if (item.sourceView) {
@@ -223,7 +257,8 @@ static CGFloat const kDismissalVelocity = 800.0;
             frame.origin.x += (cell.frame.size.width * self.index);
             cell.imageView.frame = frame;
         }
-        [UIView animateWithDuration:0.3 animations:^{
+        
+        [UIView animateWithDuration:0.2f delay:0.0f options:UIViewAnimationOptionCurveEaseOut animations:^{
             cell.imageView.frame = [cell imageViewRectWithImageSize:image.size];
         } completion:^(BOOL finished) {
             cell.enableDoubleTap = YES;
@@ -234,9 +269,9 @@ static CGFloat const kDismissalVelocity = 800.0;
     else {
         [self setPageControlHidden:NO];
         cell.imageView.frame = [cell imageViewRectWithImageSize:image.size];
-        cell.alpha = 0;
-        [UIView animateWithDuration:0.3 animations:^{
-            cell.alpha = 1;
+        self.collectionView.alpha = 0.0f;
+        [UIView animateWithDuration:0.2f delay:0.0f options:UIViewAnimationOptionCurveEaseOut animations:^{
+            self.collectionView.alpha = 1.0f;
         } completion:^(BOOL finished) {
             cell.enableDoubleTap = YES;
             [cell setMaximumZoomScale];
@@ -280,21 +315,21 @@ static CGFloat const kDismissalVelocity = 800.0;
 }
 
 - (void)endBrowseWithCell:(SCPictureCell *)pictureCell {
-    [[UIApplication sharedApplication] setStatusBarHidden:self.isStatusBarHidden withAnimation:UIStatusBarAnimationNone];
+
     [self setPageControlHidden:YES];
     SCPictureItem *item = self.items[self.index];
-    [UIView animateWithDuration:0.3 animations:^{
+    
+    self.trashButton.alpha = 0.0f;
+    [UIView animateWithDuration:0.2f delay:0.0f options:UIViewAnimationOptionCurveEaseOut animations:^{
         if (item.sourceView) {
-            self.view.backgroundColor = [UIColor clearColor];
-            self.trashButton.alpha = 0;
+            self.collectionView.backgroundColor = [UIColor clearColor];
             pictureCell.imageView.frame = [item.sourceView convertRect:item.sourceView.bounds toView:pictureCell];
         } else {
-            self.view.alpha = 0;
+            self.collectionView.alpha = 0.0f;
         }
     } completion:^(BOOL finished) {
         self.browsing = NO;
-        [self.view removeFromSuperview];
-        [self removeFromParentViewController];
+        [self dismissViewControllerAnimated:NO completion:nil];
         
         if (self.supportDelete) {
             if (self.removedItems.count) {
@@ -414,10 +449,10 @@ static CGFloat const kDismissalVelocity = 800.0;
         pictureCell.imageView.center = CGPointMake(pictureCell.scrollView.contentSize.width/2.0f, pictureCell.scrollView.contentSize.height/2.0f);
     } else {
         [UIView
-         animateWithDuration:0.7
-         delay:0
-         usingSpringWithDamping:0.7
-         initialSpringVelocity:0
+         animateWithDuration:0.5f
+         delay:0.0f
+         usingSpringWithDamping:0.5f
+         initialSpringVelocity:0.0f
          options:UIViewAnimationOptionAllowUserInteraction |
          UIViewAnimationOptionBeginFromCurrentState
          animations:^{
@@ -432,14 +467,15 @@ static CGFloat const kDismissalVelocity = 800.0;
 }
 
 - (void)dismiss {
-    [[UIApplication sharedApplication] setStatusBarHidden:self.isStatusBarHidden withAnimation:UIStatusBarAnimationNone];
+
     [self setPageControlHidden:YES];
-    [UIView animateWithDuration:0.3 animations:^{
-        self.view.alpha = 0;
+    
+    self.trashButton.alpha = 0.0f;
+    [UIView animateWithDuration:0.2f delay:0.0f options:UIViewAnimationOptionCurveEaseOut animations:^{
+        self.collectionView.alpha = 0.0f;
     } completion:^(BOOL finished) {
         self.browsing = NO;
-        [self.view removeFromSuperview];
-        [self removeFromParentViewController];
+        [self dismissViewControllerAnimated:NO completion:nil];
     }];
 }
 
