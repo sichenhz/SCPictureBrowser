@@ -329,13 +329,26 @@ static CGFloat const kDismissalVelocity = 1000.0;
     
     self.trashButton.alpha = 0.0f;
     [UIView animateWithDuration:0.2f delay:0.0f options:UIViewAnimationOptionCurveEaseOut animations:^{
+        
+        BOOL needsAnimation = NO;
+        
         if (item.sourceView) {
+            UIWindow *window = [UIApplication sharedApplication].keyWindow;
+            CGRect rect = [item.sourceView convertRect:item.sourceView.bounds toView:window];
+            if (CGRectIntersectsRect(rect, window.frame)) {
+                needsAnimation = YES;
+            }
+        }
+        
+        if (needsAnimation) {
             self.collectionView.backgroundColor = [UIColor clearColor];
             pictureCell.imageView.frame = [item.sourceView convertRect:item.sourceView.bounds toView:pictureCell];
         } else {
             self.collectionView.alpha = 0.0f;
         }
+        
     } completion:^(BOOL finished) {
+        
         self.browsing = NO;
         [self dismissViewControllerAnimated:NO completion:nil];
         
@@ -346,6 +359,7 @@ static CGFloat const kDismissalVelocity = 1000.0;
                 }
             }
         }
+        
     }];
 }
 
