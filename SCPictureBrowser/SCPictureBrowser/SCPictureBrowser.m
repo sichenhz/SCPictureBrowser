@@ -18,6 +18,8 @@ static CGFloat const kDismissalVelocity = 1000.0;
 
 @interface SCPictureBrowser()<UICollectionViewDataSource, UICollectionViewDelegate, SCPictureDelegate, UIScrollViewDelegate>
 
+@property (nonatomic, getter=isStatusBarHidden) BOOL statusBarHidden;
+
 @property (nonatomic, getter=isFirstShow) BOOL firstShow;
 @property (nonatomic, getter=isBrowsing) BOOL browsing;
 
@@ -48,7 +50,7 @@ static CGFloat const kDismissalVelocity = 1000.0;
 }
 
 - (BOOL)prefersStatusBarHidden {
-    return YES;
+    return self.statusBarHidden;
 }
 
 #pragma mark - Life Cycle
@@ -56,6 +58,7 @@ static CGFloat const kDismissalVelocity = 1000.0;
 - (instancetype)init {
     if (self = [super init]) {
         self.automaticallyAdjustsScrollViewInsets = NO;
+        _statusBarHidden = YES;
         _contentMode = UIViewContentModeScaleAspectFill;
         _screenshot = [self screenshotFromView:[UIApplication sharedApplication].keyWindow];
     }
@@ -316,6 +319,9 @@ static CGFloat const kDismissalVelocity = 1000.0;
 
 - (void)endBrowseWithCell:(SCPictureCell *)pictureCell {
 
+    self.statusBarHidden = NO;
+    [self setNeedsStatusBarAppearanceUpdate];
+    
     [self setPageControlHidden:YES];
     SCPictureItem *item = self.items[self.index];
     
@@ -467,6 +473,9 @@ static CGFloat const kDismissalVelocity = 1000.0;
 }
 
 - (void)dismiss {
+
+    self.statusBarHidden = NO;
+    [self setNeedsStatusBarAppearanceUpdate];
 
     [self setPageControlHidden:YES];
     
