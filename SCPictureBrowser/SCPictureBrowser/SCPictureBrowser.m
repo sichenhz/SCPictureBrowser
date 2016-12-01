@@ -58,7 +58,6 @@ static CGFloat const kDismissalVelocity = 1000.0;
 - (instancetype)init {
     if (self = [super init]) {
         self.automaticallyAdjustsScrollViewInsets = NO;
-        _statusBarHidden = YES;
         _contentMode = UIViewContentModeScaleAspectFill;
         _screenshot = [self screenshotFromView:[UIApplication sharedApplication].keyWindow];
     }
@@ -93,7 +92,10 @@ static CGFloat const kDismissalVelocity = 1000.0;
     
     _isFromShowAction = YES;
     UIWindow *window = [UIApplication sharedApplication].keyWindow;
-    [window.rootViewController presentViewController:self animated:NO completion:nil];
+    [window.rootViewController presentViewController:self animated:NO completion:^{
+        self.statusBarHidden = YES;
+        [self setNeedsStatusBarAppearanceUpdate];
+    }];
 }
 
 #pragma mark - Setter
