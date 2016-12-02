@@ -350,7 +350,7 @@ static CGFloat const kDismissalVelocity = 1000.0;
             pictureCell.imageView.frame = [item.sourceView convertRect:item.sourceView.bounds toView:pictureCell];
         } else {
             CGRect frame = pictureCell.imageView.frame;
-            frame.size = CGSizeMake(frame.size.width / 2, frame.size.height / 2);
+            frame.size = CGSizeMake(frame.size.width * 2/3, frame.size.height * 2/3);
             pictureCell.imageView.frame = frame;
             pictureCell.imageView.center = CGPointMake(pictureCell.frame.size.width / 2, pictureCell.frame.size.height / 2);
             pictureCell.imageView.alpha = 0.0f;
