@@ -29,6 +29,8 @@ NS_ASSUME_NONNULL_BEGIN
 // 是否支持删除功能，默认为NO
 @property (nonatomic) BOOL supportDelete;
 
+// 是否隐藏状态栏，需要设置成和来源页面一致，默认为NO
+@property (nonatomic) BOOL statusBarHidden;
 // 状态栏颜色，需要设置成和来源页面一致，默认为UIStatusBarStyleLightContent
 @property (nonatomic) UIStatusBarStyle statusBarStyle;
 
