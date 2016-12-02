@@ -54,7 +54,7 @@ static CGFloat const kDismissalVelocity = 1000.0;
 }
 
 - (UIStatusBarStyle)preferredStatusBarStyle {
-    return UIStatusBarStyleLightContent;
+    return self.statusBarStyle;
 }
 
 #pragma mark - Life Cycle
@@ -62,6 +62,8 @@ static CGFloat const kDismissalVelocity = 1000.0;
 - (instancetype)init {
     if (self = [super init]) {
         self.automaticallyAdjustsScrollViewInsets = NO;
+        _statusBarHidden = YES;
+        _statusBarStyle = UIStatusBarStyleLightContent;
         _contentMode = UIViewContentModeScaleAspectFill;
         _screenshot = [self screenshotFromView:[UIApplication sharedApplication].keyWindow];
     }
@@ -344,11 +346,16 @@ static CGFloat const kDismissalVelocity = 1000.0;
             }
         }
         
+        self.collectionView.backgroundColor = [UIColor clearColor];
+
         if (needsAnimation) {
-            self.collectionView.backgroundColor = [UIColor clearColor];
             pictureCell.imageView.frame = [item.sourceView convertRect:item.sourceView.bounds toView:pictureCell];
         } else {
-            self.collectionView.alpha = 0.0f;
+            CGRect frame = pictureCell.imageView.frame;
+            frame.size = CGSizeMake(frame.size.width / 2, frame.size.height / 2);
+            pictureCell.imageView.frame = frame;
+            pictureCell.imageView.center = CGPointMake(pictureCell.frame.size.width / 2, pictureCell.frame.size.height / 2);
+            pictureCell.imageView.alpha = 0.0f;
         }
         
     } completion:^(BOOL finished) {
