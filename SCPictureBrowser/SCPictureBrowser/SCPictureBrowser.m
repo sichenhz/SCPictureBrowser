@@ -234,6 +234,8 @@ static CGFloat const kDismissalVelocity = 1000.0;
 }
 
 - (void)configureCellFirstWithItem:(SCPictureItem *)item cell:(SCPictureCell *)cell {
+    
+    self.collectionView.backgroundColor = [UIColor blackColor];
     self.firstShow = NO;
     [self prefetchPictures];
     
@@ -255,8 +257,6 @@ static CGFloat const kDismissalVelocity = 1000.0;
 
 - (void)showImage:(UIImage *)image item:(SCPictureItem *)item cell:(SCPictureCell *)cell cacheType:(SDImageCacheType)cacheType {
     
-    self.collectionView.backgroundColor = [UIColor blackColor];
-
     cell.imageView.image = image;
     
     if (item.sourceView) {
